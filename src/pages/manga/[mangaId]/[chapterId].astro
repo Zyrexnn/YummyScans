@@ -1,43 +1,43 @@
 ---
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
+import { fetchChapterPages, fetchChapterInfo, fetchMangaDetail } from '../../../lib/mangadex'
 
 const { mangaId, chapterId } = Astro.params
 
-let pages: any[] = []
+let pages: { url: string; number: number }[] = []
 let chapterInfo: any = null
 let mangaTitle = ''
-let error = null
+let error: string | null = null
 
 try {
   // Fetch chapter pages
-  const res = await fetch(`https://api.mangadex.org/at-home/server/${chapterId}`)
-  if (!res.ok) throw new Error('Chapter not found')
-  const data = await res.json()
+  const chapterData = await fetchChapterPages(chapterId!)
+  const baseUrl = chapterData.baseUrl
+  const hash = chapterData.hash
 
-  const baseUrl = data.baseUrl
-  const hash = data.chapter.hash
-  const pageFiles = data.chapter.data // high quality
+  // Use high quality pages, fallback to data saver
+  const pageFiles = chapterData.pages.length > 0 ? chapterData.pages : chapterData.pagesSaver
 
   pages = pageFiles.map((file: string, i: number) => ({
-    url: `${baseUrl}/data/${hash}/${file}`,
+    url: `/api/page?url=${encodeURIComponent(`${baseUrl}/data/${hash}/${file}`)}`,
     number: i + 1,
   }))
 
-  // Fetch manga title
-  const mangaRes = await fetch(`https://api.mangadex.org/manga/${mangaId}?limit=1`)
-  if (mangaRes.ok) {
-    const mangaData = await mangaRes.json()
-    mangaTitle = mangaData.data?.attributes?.title?.en || Object.values(mangaData.data?.attributes?.title || {})[0] || ''
-  }
+  // Fetch chapter info
+  chapterInfo = await fetchChapterInfo(chapterId!)
 
-  // Get chapter number from feed
-  const chRes = await fetch(`https://api.mangadex.org/chapter/${chapterId}`)
-  if (chRes.ok) {
-    const chData = await chRes.json()
-    chapterInfo = chData.data?.attributes
+  // Fetch manga title
+  try {
+    const manga = await fetchMangaDetail(mangaId!)
+    mangaTitle = manga?.attributes?.title?.en 
+      || manga?.attributes?.title?.ja 
+      || Object.values(manga?.attributes?.title || {})[0] 
+      || ''
+  } catch {
+    // Title fetch failed, continue without it
   }
-} catch (e) {
-  error = e.message
+} catch (e: any) {
+  error = e.message || 'Failed to load chapter'
 }
 
 const chapterNum = chapterInfo?.chapter || '?'
@@ -96,6 +96,9 @@ const chapterTitle = chapterInfo?.title || ''
         font-weight: 600;
         text-align: center;
         flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .nav-buttons {
         position: fixed;
@@ -155,6 +158,9 @@ const chapterTitle = chapterInfo?.title || ''
         font-size: 14px;
         font-weight: 500;
       }
+      .btn-back:hover {
+        background: rgba(255,255,255,0.15);
+      }
     </style>
   </head>
   <body>
@@ -175,7 +181,7 @@ const chapterTitle = chapterInfo?.title || ''
             <ArrowLeft style="width:16px;height:16px" /> Kembali
           </a>
           <div class="title">
-            {mangaTitle} - Chapter {chapterNum}
+            {mangaTitle ? `${mangaTitle} - ` : ''}Chapter {chapterNum}
             {chapterTitle && `: ${chapterTitle}`}
           </div>
           <div style="width:80px"></div>
@@ -198,7 +204,7 @@ const chapterTitle = chapterInfo?.title || ''
         {/* Floating Nav */}
         <div class="nav-buttons">
           <a href={`/manga/${mangaId}`}>
-            <ArrowLeft style="width:14px;height:14px" /> Daftar
+            <ArrowLeft style="width:14px;height:14px" /> Daftar Chapter
           </a>
         </div>
       </>

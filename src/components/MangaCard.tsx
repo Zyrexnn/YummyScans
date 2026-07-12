@@ -2,16 +2,14 @@
 
 import { motion } from 'framer-motion'
 import { Badge } from './ui/badge'
-import { Eye, Star, BookOpen } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 
 interface MangaCardProps {
   title: string
-  coverUrl: string
+  coverUrl: string | null
   slug: string
   genres?: { id: string; name: string; slug: string }[]
   status?: string
-  views?: number
-  rating?: number
   index?: number
 }
 
@@ -21,8 +19,6 @@ export default function MangaCard({
   slug,
   genres,
   status,
-  views,
-  rating,
   index = 0
 }: MangaCardProps) {
   return (

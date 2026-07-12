@@ -1,49 +1,60 @@
 ---
 import EditorialLayout from '../../../layouts/EditorialLayout.astro'
 import { Badge } from '../../../components/ui/badge'
-import { ArrowLeft, BookOpen, User, Calendar, Tag } from 'lucide-react'
+import { ArrowLeft, BookOpen, User, Calendar } from 'lucide-react'
+import { fetchMangaDetail, fetchMangaChapters } from '../../../lib/mangadex'
 
 const { mangaId } = Astro.params
 
 let manga: any = null
 let chapters: any[] = []
-let error = null
+let coverUrl: string | null = null
+let title = 'Unknown'
+let description = ''
+let status = 'unknown'
+let year: number | null = null
+let authorName = ''
+let genres: string[] = []
+let error: string | null = null
 
 try {
   // Fetch manga detail
-  const res = await fetch(`https://api.mangadex.org/manga/${mangaId}?includes[]=cover_art&includes[]=author`)
-  if (!res.ok) throw new Error('Manga not found')
-  const data = await res.json()
-  manga = data.data
+  manga = await fetchMangaDetail(mangaId!)
 
-  // Fetch chapters (Indonesian)
-  const chRes = await fetch(
-    `https://api.mangadex.org/manga/${mangaId}/feed?translatedLanguage[]=id&order[chapter]=desc&limit=100`
-  )
-  if (chRes.ok) {
-    const chData = await chRes.json()
-    chapters = chData.data || []
-  }
-} catch (e) {
-  error = e.message
+  // Extract data
+  const cover = manga?.relationships?.find((r: any) => r.type === 'cover_art')
+  const fileName = cover?.attributes?.fileName
+  coverUrl = fileName ? `/api/cover?id=${mangaId}` : null
+
+  title = manga?.attributes?.title?.en 
+    || manga?.attributes?.title?.ja 
+    || Object.values(manga?.attributes?.title || {})[0] 
+    || 'Unknown'
+  
+  description = manga?.attributes?.description?.en 
+    || manga?.attributes?.description?.id 
+    || ''
+  
+  status = manga?.attributes?.status || 'unknown'
+  year = manga?.attributes?.year || null
+
+  const author = manga?.relationships?.find((r: any) => r.type === 'author')
+  authorName = author?.attributes?.name || ''
+
+  genres = (manga?.attributes?.tags || [])
+    .filter((t: any) => t.attributes?.group === 'genre')
+    .map((t: any) => t.attributes?.name?.en || 'Unknown')
+
+  // Fetch chapters
+  chapters = await fetchMangaChapters(mangaId!)
+} catch (e: any) {
+  error = e.message || 'Failed to load manga'
 }
-
-// Extract data
-const cover = manga?.relationships?.find((r: any) => r.type === 'cover_art')
-const author = manga?.relationships?.find((r: any) => r.type === 'author')
-const fileName = cover?.attributes?.fileName
-const coverUrl = fileName ? `https://uploads.mangadex.org/covers/${mangaId}/${fileName}.512.jpg` : null
-const title = manga?.attributes?.title?.en || manga?.attributes?.title?.ja || Object.values(manga?.attributes?.title || {})[0] || 'Unknown'
-const description = manga?.attributes?.description?.en || manga?.attributes?.description?.id || ''
-const status = manga?.attributes?.status || 'unknown'
-const year = manga?.attributes?.year
-const genres = manga?.attributes?.tags?.filter((t: any) => t.attributes.group === 'genre').map((t: any) => t.attributes.name.en) || []
 ---
 
 <EditorialLayout title={`${title} - YummyScans`}>
 
   {error || !manga ? (
-    /* Error State */
     <section class="section-spacing bg-background">
       <div class="max-w-[1280px] mx-auto px-6 text-center">
         <div class="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
@@ -52,7 +63,7 @@ const genres = manga?.attributes?.tags?.filter((t: any) => t.attributes.group ==
         <h1 class="text-headline mb-3">Manga Tidak Ditemukan</h1>
         <p class="text-body-sm text-muted-foreground mb-8">{error || 'Manga yang kamu cari tidak tersedia.'}</p>
         <a href="/" class="yummy-btn-secondary inline-flex items-center gap-2">
-          <ArrowLeft class="w-4 h-4" /> Kembali
+          <ArrowLeft class="w-4 h-4" /> Kembali ke Beranda
         </a>
       </div>
     </section>
@@ -74,7 +85,7 @@ const genres = manga?.attributes?.tags?.filter((t: any) => t.attributes.group ==
             <div class="w-full md:w-[320px] flex-shrink-0">
               <div class="aspect-[3/4] rounded-[16px] overflow-hidden bg-secondary">
                 {coverUrl ? (
-                  <img src={coverUrl} alt={title} class="w-full h-full object-cover" />
+                  <img src={coverUrl} alt={title} class="w-full h-full object-cover" loading="eager" />
                 ) : (
                   <div class="w-full h-full flex items-center justify-center">
                     <BookOpen class="w-16 h-16 text-muted-foreground" />
@@ -87,7 +98,7 @@ const genres = manga?.attributes?.tags?.filter((t: any) => t.attributes.group ==
             <div class="flex-1">
               {/* Status Badge */}
               <Badge variant={status === 'ongoing' ? 'default' : 'secondary'} class="mb-4">
-                {status === 'ongoing' ? 'Ongoing' : status === 'completed' ? 'Tamat' : 'Hiatus'}
+                {status === 'ongoing' ? 'Ongoing' : status === 'completed' ? 'Tamat' : status === 'hiatus' ? 'Hiatus' : status}
               </Badge>
 
               {/* Title */}
@@ -95,10 +106,10 @@ const genres = manga?.attributes?.tags?.filter((t: any) => t.attributes.group ==
 
               {/* Meta */}
               <div class="flex flex-wrap gap-4 mb-6 text-sm text-muted-foreground">
-                {author && (
+                {authorName && (
                   <div class="flex items-center gap-1.5">
                     <User class="w-4 h-4" />
-                    <span>{author.attributes.name}</span>
+                    <span>{authorName}</span>
                   </div>
                 )}
                 {year && (
@@ -128,7 +139,9 @@ const genres = manga?.attributes?.tags?.filter((t: any) => t.attributes.group ==
               {description && (
                 <div class="mb-8">
                   <h3 class="text-headline mb-3">Sinopsis</h3>
-                  <p class="text-body-sm text-muted-foreground leading-relaxed">{description.slice(0, 500)}{description.length > 500 ? '...' : ''}</p>
+                  <p class="text-body-sm text-muted-foreground leading-relaxed">
+                    {description.length > 500 ? description.slice(0, 500) + '...' : description}
+                  </p>
                 </div>
               )}
 
@@ -150,23 +163,32 @@ const genres = manga?.attributes?.tags?.filter((t: any) => t.attributes.group ==
           <div class="max-w-[1280px] mx-auto px-6">
             <h2 class="text-headline mb-6">Daftar Chapter</h2>
             <div class="border border-border rounded-[12px] overflow-hidden">
-              {chapters.map((ch: any, i: number) => (
+              {chapters.map((ch: any) => (
                 <a
                   href={`/manga/${mangaId}/${ch.id}`}
                   class="flex items-center justify-between px-5 py-4 hover:bg-secondary transition-colors no-underline text-foreground border-b border-border last:border-b-0"
                 >
                   <div class="flex items-center gap-3">
-                    <span class="text-sm font-semibold">Chapter {ch.attributes.chapter || '?'}</span>
-                    {ch.attributes.title && (
+                    <span class="text-sm font-semibold">Chapter {ch.attributes?.chapter || '?'}</span>
+                    {ch.attributes?.title && (
                       <span class="text-sm text-muted-foreground">- {ch.attributes.title}</span>
                     )}
                   </div>
                   <span class="text-xs text-muted-foreground">
-                    {ch.attributes.pages || '?'} halaman
+                    {ch.attributes?.pages || '?'} halaman
                   </span>
                 </a>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* No Chapters */}
+      {chapters.length === 0 && !error && (
+        <section class="pb-16 bg-background">
+          <div class="max-w-[1280px] mx-auto px-6 text-center">
+            <p class="text-muted-foreground">Belum ada chapter dalam Bahasa Indonesia.</p>
           </div>
         </section>
       )}
