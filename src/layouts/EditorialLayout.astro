@@ -1,3 +1,42 @@
 ---
+import '../styles/global.css'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer.astro'
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const {
+  title = 'YummyScans',
+  description = 'Baca komik manga/manhwa/manhua Sub Indo gratis tanpa iklan'
+} = Astro.props
 ---
-<html><body><slot /></body></html>
+
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <script is:inline>
+      const stored = localStorage.getItem('theme')
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      if (stored === 'dark' || (!stored && prefersDark)) {
+        document.documentElement.classList.add('dark')
+      }
+    </script>
+  </head>
+  <body class="min-h-screen bg-background text-foreground transition-theme">
+    <Navbar client:load />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

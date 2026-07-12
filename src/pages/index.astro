@@ -1,3 +1,121 @@
 ---
+import EditorialLayout from '../layouts/EditorialLayout.astro'
+import MangaCard from '../components/MangaCard'
+import MarqueeStrip from '../components/MarqueeStrip'
+import { fetchPopularManga } from '../lib/mangadex'
+import { ArrowRight, Sparkles, TrendingUp, Zap, BookOpen } from 'lucide-react'
+
+let mangaList: any[] = []
+
+try {
+  mangaList = await fetchPopularManga(5)
+} catch (error) {
+  console.error('Error fetching manga:', error)
+}
 ---
-<html><body><h1>YummyScans</h1></body></html>
+
+<EditorialLayout title="YummyScans - Baca Komik Sub Indo">
+
+  {/* ==================== HERO - Block Lilac ==================== */}
+  <section class="bg-block-lilac yummy-color-block transition-theme">
+    <div class="max-w-[1280px] mx-auto text-center">
+      <div class="inline-flex items-center gap-2 bg-white/20 dark:bg-black/20 backdrop-blur-sm rounded-full px-4 py-1.5 mb-8">
+        <Sparkles class="w-4 h-4" />
+        <span class="text-[13px] font-semibold">Gratis Tanpa Iklan</span>
+      </div>
+
+      <h1 class="text-display-xl mb-6">
+        Baca Manga<br/>Sub Indo
+      </h1>
+
+      <p class="text-subhead mb-10 max-w-2xl mx-auto opacity-80">
+        Jelajahi ribuan manga, manhwa, dan manhua dengan terjemahan bahasa Indonesia berkualitas tinggi.
+      </p>
+
+      <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+        <a href="/search" class="yummy-btn-primary flex items-center justify-center gap-2">
+          Mulai Baca
+          <ArrowRight class="w-4 h-4" />
+        </a>
+        <a href="/genre" class="yummy-btn-secondary flex items-center justify-center">
+          Jelajahi Genre
+        </a>
+      </div>
+
+      <div class="flex justify-center gap-12 md:gap-20">
+        <div class="text-center">
+          <div class="text-3xl md:text-4xl font-bold mb-1">1K+</div>
+          <div class="text-caption opacity-60">Manga</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl md:text-4xl font-bold mb-1">50K+</div>
+          <div class="text-caption opacity-60">Pembaca</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl md:text-4xl font-bold mb-1">4.9</div>
+          <div class="text-caption opacity-60">Rating</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ==================== MARQUEE STRIP ==================== */}
+  <MarqueeStrip client:load />
+
+  {/* ==================== POPULAR MANGA ==================== */}
+  <section class="section-spacing bg-background transition-theme">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <div class="flex items-end justify-between mb-10">
+        <div>
+          <div class="text-eyebrow text-muted-foreground mb-3 flex items-center gap-2">
+            <TrendingUp class="w-4 h-4" />
+            Populer
+          </div>
+          <h2 class="text-display-lg">Manga Populer</h2>
+        </div>
+        <a href="/search?sort=popular" class="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          Lihat Semua <ArrowRight class="w-4 h-4" />
+        </a>
+      </div>
+
+      {mangaList.length > 0 ? (
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6">
+          {mangaList.map((manga, i) => (
+            <MangaCard
+              client:load
+              title={manga.title}
+              coverUrl={manga.coverUrl}
+              slug={manga.slug}
+              genres={manga.genres}
+              status={manga.status}
+              index={i}
+            />
+          ))}
+        </div>
+      ) : (
+        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
+          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
+            <BookOpen class="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p class="text-headline mb-2">Gagal memuat manga</p>
+          <p class="text-body-sm text-muted-foreground">Coba refresh halaman.</p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {/* ==================== CTA ==================== */}
+  <section class="section-spacing bg-background transition-theme">
+    <div class="max-w-2xl mx-auto px-6 text-center">
+      <h2 class="text-display-lg mb-6">Siap Membaca?</h2>
+      <p class="text-body-lg text-muted-foreground mb-10">
+        Jelajahi ribuan manga dan manhwa dengan terjemahan bahasa Indonesia yang berkualitas.
+      </p>
+      <a href="/search" class="yummy-btn-primary inline-flex items-center gap-2">
+        Mulai Baca Sekarang
+        <ArrowRight class="w-4 h-4" />
+      </a>
+    </div>
+  </section>
+
+</EditorialLayout>
