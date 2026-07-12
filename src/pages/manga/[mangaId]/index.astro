@@ -1,4 +1,176 @@
 ---
+import EditorialLayout from '../../../layouts/EditorialLayout.astro'
+import { Badge } from '../../../components/ui/badge'
+import { ArrowLeft, BookOpen, User, Calendar, Tag } from 'lucide-react'
+
 const { mangaId } = Astro.params
+
+let manga: any = null
+let chapters: any[] = []
+let error = null
+
+try {
+  // Fetch manga detail
+  const res = await fetch(`https://api.mangadex.org/manga/${mangaId}?includes[]=cover_art&includes[]=author`)
+  if (!res.ok) throw new Error('Manga not found')
+  const data = await res.json()
+  manga = data.data
+
+  // Fetch chapters (Indonesian)
+  const chRes = await fetch(
+    `https://api.mangadex.org/manga/${mangaId}/feed?translatedLanguage[]=id&order[chapter]=desc&limit=100`
+  )
+  if (chRes.ok) {
+    const chData = await chRes.json()
+    chapters = chData.data || []
+  }
+} catch (e) {
+  error = e.message
+}
+
+// Extract data
+const cover = manga?.relationships?.find((r: any) => r.type === 'cover_art')
+const author = manga?.relationships?.find((r: any) => r.type === 'author')
+const fileName = cover?.attributes?.fileName
+const coverUrl = fileName ? `https://uploads.mangadex.org/covers/${mangaId}/${fileName}.512.jpg` : null
+const title = manga?.attributes?.title?.en || manga?.attributes?.title?.ja || Object.values(manga?.attributes?.title || {})[0] || 'Unknown'
+const description = manga?.attributes?.description?.en || manga?.attributes?.description?.id || ''
+const status = manga?.attributes?.status || 'unknown'
+const year = manga?.attributes?.year
+const genres = manga?.attributes?.tags?.filter((t: any) => t.attributes.group === 'genre').map((t: any) => t.attributes.name.en) || []
 ---
-<html><body><h1>Manga: {mangaId}</h1></body></html>
+
+<EditorialLayout title={`${title} - YummyScans`}>
+
+  {error || !manga ? (
+    /* Error State */
+    <section class="section-spacing bg-background">
+      <div class="max-w-[1280px] mx-auto px-6 text-center">
+        <div class="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+          <BookOpen class="w-10 h-10 text-muted-foreground" />
+        </div>
+        <h1 class="text-headline mb-3">Manga Tidak Ditemukan</h1>
+        <p class="text-body-sm text-muted-foreground mb-8">{error || 'Manga yang kamu cari tidak tersedia.'}</p>
+        <a href="/" class="yummy-btn-secondary inline-flex items-center gap-2">
+          <ArrowLeft class="w-4 h-4" /> Kembali
+        </a>
+      </div>
+    </section>
+  ) : (
+    <>
+      {/* Back Button */}
+      <div class="max-w-[1280px] mx-auto px-6 py-4">
+        <a href="/" class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors no-underline">
+          <ArrowLeft class="w-4 h-4" /> Kembali
+        </a>
+      </div>
+
+      {/* Manga Detail */}
+      <section class="pb-16 bg-background">
+        <div class="max-w-[1280px] mx-auto px-6">
+          <div class="flex flex-col md:flex-row gap-8 md:gap-12">
+
+            {/* Cover Image */}
+            <div class="w-full md:w-[320px] flex-shrink-0">
+              <div class="aspect-[3/4] rounded-[16px] overflow-hidden bg-secondary">
+                {coverUrl ? (
+                  <img src={coverUrl} alt={title} class="w-full h-full object-cover" />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center">
+                    <BookOpen class="w-16 h-16 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Info */}
+            <div class="flex-1">
+              {/* Status Badge */}
+              <Badge variant={status === 'ongoing' ? 'default' : 'secondary'} class="mb-4">
+                {status === 'ongoing' ? 'Ongoing' : status === 'completed' ? 'Tamat' : 'Hiatus'}
+              </Badge>
+
+              {/* Title */}
+              <h1 class="text-display-lg mb-4">{title}</h1>
+
+              {/* Meta */}
+              <div class="flex flex-wrap gap-4 mb-6 text-sm text-muted-foreground">
+                {author && (
+                  <div class="flex items-center gap-1.5">
+                    <User class="w-4 h-4" />
+                    <span>{author.attributes.name}</span>
+                  </div>
+                )}
+                {year && (
+                  <div class="flex items-center gap-1.5">
+                    <Calendar class="w-4 h-4" />
+                    <span>{year}</span>
+                  </div>
+                )}
+                <div class="flex items-center gap-1.5">
+                  <BookOpen class="w-4 h-4" />
+                  <span>{chapters.length} Chapter</span>
+                </div>
+              </div>
+
+              {/* Genres */}
+              {genres.length > 0 && (
+                <div class="flex flex-wrap gap-2 mb-6">
+                  {genres.map((genre: string) => (
+                    <span class="text-xs font-mono uppercase tracking-wider px-3 py-1.5 rounded-full bg-secondary text-foreground">
+                      {genre}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Synopsis */}
+              {description && (
+                <div class="mb-8">
+                  <h3 class="text-headline mb-3">Sinopsis</h3>
+                  <p class="text-body-sm text-muted-foreground leading-relaxed">{description.slice(0, 500)}{description.length > 500 ? '...' : ''}</p>
+                </div>
+              )}
+
+              {/* Read Button */}
+              {chapters.length > 0 && (
+                <a href={`/manga/${mangaId}/${chapters[0].id}`} class="yummy-btn-primary inline-flex items-center gap-2">
+                  Baca Chapter 1
+                  <ArrowLeft class="w-4 h-4 rotate-180" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Chapter List */}
+      {chapters.length > 0 && (
+        <section class="pb-16 bg-background">
+          <div class="max-w-[1280px] mx-auto px-6">
+            <h2 class="text-headline mb-6">Daftar Chapter</h2>
+            <div class="border border-border rounded-[12px] overflow-hidden">
+              {chapters.map((ch: any, i: number) => (
+                <a
+                  href={`/manga/${mangaId}/${ch.id}`}
+                  class="flex items-center justify-between px-5 py-4 hover:bg-secondary transition-colors no-underline text-foreground border-b border-border last:border-b-0"
+                >
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-semibold">Chapter {ch.attributes.chapter || '?'}</span>
+                    {ch.attributes.title && (
+                      <span class="text-sm text-muted-foreground">- {ch.attributes.title}</span>
+                    )}
+                  </div>
+                  <span class="text-xs text-muted-foreground">
+                    {ch.attributes.pages || '?'} halaman
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </>
+  )}
+
+</EditorialLayout>
