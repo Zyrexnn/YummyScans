@@ -1,0 +1,21 @@
+# build
+dist/
+.astro/
+.vercel/
+
+# deps
+node_modules/
+
+# env
+.env
+.env.local
+.env.production
+.env.*
+
+# sensitive docs
+prd.md
+DESIGN-figma.md
+
+# os
+.DS_Store
+Thumbs.db
