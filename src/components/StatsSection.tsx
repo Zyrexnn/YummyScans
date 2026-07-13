@@ -52,19 +52,20 @@ function StatItem({ value, suffix = '', label, delay = 0 }: {
       <div className="text-display-lg text-foreground mb-2">
         {count.toLocaleString()}{suffix}
       </div>
-      <div className="text-eyebrow text-muted-foreground">{label}</div>
+      <div className="text-[12px] font-medium text-muted-foreground tracking-wide">{label}</div>
     </motion.div>
   )
 }
 
 export default function StatsSection() {
   return (
+    // ponytail: values below are illustrative placeholders — wire real counts from Supabase when DB is connected
     <section className="section-spacing bg-secondary/50 transition-theme">
       <div className="max-w-[1280px] mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
           <StatItem value={5000} suffix="+" label="Total Manga" delay={0} />
           <StatItem value={120} suffix="K+" label="Chapter" delay={0.1} />
-          <StatItem value={15} label="Genre" delay={0.2} />
+          <StatItem value={13} label="Genre" delay={0.2} />
           <StatItem value={50} suffix="K+" label="Pembaca" delay={0.3} />
         </div>
       </div>

@@ -32,7 +32,6 @@ export default function GenreShowcase() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <div className="text-eyebrow text-muted-foreground mb-3">Koleksi Lengkap</div>
           <h2 className="text-display-lg mb-4">Jelajahi Genre</h2>
           <p className="text-body-lg text-muted-foreground max-w-xl mx-auto">
             Temukan manga favoritmu dari berbagai genre yang tersedia.

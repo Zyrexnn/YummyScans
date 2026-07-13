@@ -2,20 +2,24 @@
 import EditorialLayout from '../layouts/EditorialLayout.astro'
 import MangaCard from '../components/MangaCard'
 import MarqueeStrip from '../components/MarqueeStrip'
-import GLSLHills from '../components/GLSLHills'
+import Hero from '../components/Hero'
 import StatsSection from '../components/StatsSection'
 import FeaturesSection from '../components/FeaturesSection'
 import GenreShowcase from '../components/GenreShowcase'
 import FAQSection from '../components/FAQSection'
+import Rekomendasi from '../components/Rekomendasi'
 import { fetchLatest } from '../lib/komiku'
-import { ArrowRight, Sparkles, TrendingUp, BookOpen, AlertCircle } from 'lucide-react'
+import { ArrowRight, BookOpen, AlertCircle } from 'lucide-react'
 
 let mangaList: any[] = []
+let latestFeed: any[] = []
 let fetchError: string | null = null
 
 try {
-  const latest = await fetchLatest(1)
-  mangaList = latest.slice(0, 10).map((m) => ({
+  const pages = await Promise.all([fetchLatest(1), fetchLatest(2), fetchLatest(3)])
+  const merged = pages.flat()
+  latestFeed = merged
+  mangaList = merged.slice(0, 10).map((m) => ({
     id: m.slug,
     title: m.title,
     slug: m.slug,
@@ -32,32 +36,10 @@ try {
 <EditorialLayout title="YummyScans - Baca Komik Sub Indo">
 
   {/* HERO */}
-  <section class="relative overflow-hidden bg-background min-h-[90vh] flex items-center justify-center transition-theme">
-    <GLSLHills client:load speed={0.3} cameraZ={100} />
-    <div class="relative z-10 max-w-[1280px] mx-auto text-center px-6 py-24">
-      <div class="inline-flex items-center gap-2 bg-white/10 dark:bg-white/10 backdrop-blur-md rounded-full px-4 py-1.5 mb-8 border border-white/20">
-        <Sparkles class="w-4 h-4 text-primary" />
-        <span class="text-[13px] font-semibold text-foreground/80">Gratis Tanpa Iklan</span>
-      </div>
+  <Hero client:load />
 
-      <h1 class="text-display-xl mb-6 text-foreground">
-        Baca Manga<br/>Sub Indo
-      </h1>
-
-      <p class="text-subhead mb-10 max-w-2xl mx-auto text-foreground/70">
-        Jelajahi ribuan manga, manhwa, dan manhua dengan terjemahan bahasa Indonesia berkualitas tinggi.
-      </p>
-
-      <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-        <a href="/search" class="yummy-btn-primary flex items-center justify-center gap-2">
-          Mulai Baca <ArrowRight class="w-4 h-4" />
-        </a>
-        <a href="/genre" class="yummy-btn-secondary flex items-center justify-center">
-          Jelajahi Genre
-        </a>
-      </div>
-    </div>
-  </section>
+  {/* REKOMENDASI */}
+  <Rekomendasi client:load manga={latestFeed} />
 
   {/* MARQUEE */}
   <MarqueeStrip client:load />
@@ -73,10 +55,6 @@ try {
     <div class="max-w-[1280px] mx-auto px-6">
       <div class="flex items-end justify-between mb-10">
         <div>
-          <div class="text-eyebrow text-muted-foreground mb-3 flex items-center gap-2">
-            <TrendingUp class="w-4 h-4" />
-            Terbaru
-          </div>
           <h2 class="text-display-lg">Manga Terbaru</h2>
         </div>
         <a href="/latest" class="yummy-btn-secondary hidden sm:inline-flex items-center gap-2">
@@ -135,7 +113,7 @@ try {
         Jelajahi ribuan manga dan manhwa dengan terjemahan bahasa Indonesia yang berkualitas.
       </p>
       <a href="/search" class="yummy-btn-primary inline-flex items-center gap-2">
-        Mulai Baca Sekarang <ArrowRight class="w-4 h-4" />
+        Mulai Baca <ArrowRight class="w-4 h-4" />
       </a>
     </div>
   </section>
