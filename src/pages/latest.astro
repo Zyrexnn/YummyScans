@@ -1,0 +1,96 @@
+---
+import EditorialLayout from '../layouts/EditorialLayout.astro'
+import MangaCard from '../components/MangaCard'
+import { fetchLatest } from '../lib/komiku'
+import { ArrowLeft, ArrowRight, BookOpen, Clock } from 'lucide-react'
+
+const page = parseInt(Astro.url.searchParams.get('page') || '1')
+
+let mangaList: any[] = []
+let error: string | null = null
+
+try {
+  const items = await fetchLatest(page)
+  mangaList = items.map(m => ({
+    id: m.slug,
+    title: m.title,
+    slug: m.slug,
+    coverUrl: m.coverUrl,
+    status: m.type || 'ongoing',
+    genres: [{ id: '', name: m.type || '', slug: '' }],
+  }))
+} catch (e: any) {
+  error = e.message || 'Failed to load latest manga'
+}
+
+const hasPrev = page > 1
+const hasNext = mangaList.length >= 10
+---
+
+<EditorialLayout title="Terbaru - YummyScans" description="Manga terbaru yang diupdate">
+
+  <section class="section-spacing bg-background">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <div class="mb-10">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-primary rounded-[12px] flex items-center justify-center">
+            <Clock class="w-5 h-5 text-primary-foreground" />
+          </div>
+          <h1 class="text-display-lg">Terbaru</h1>
+        </div>
+        <p class="text-body-lg text-muted-foreground">Manga yang baru diupdate</p>
+      </div>
+
+      {error ? (
+        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
+          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
+            <BookOpen class="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p class="text-headline mb-2">Gagal memuat manga</p>
+          <p class="text-body-sm text-muted-foreground mb-4">{error}</p>
+          <a href="/latest" class="yummy-btn-secondary inline-block">Coba Lagi</a>
+        </div>
+      ) : mangaList.length === 0 ? (
+        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
+          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
+            <BookOpen class="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p class="text-headline mb-2">Tidak ada manga</p>
+          <p class="text-body-sm text-muted-foreground mb-4">Belum ada manga terbaru.</p>
+          <a href="/" class="yummy-btn-secondary inline-block">Kembali ke Beranda</a>
+        </div>
+      ) : (
+        <>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6">
+            {mangaList.map((manga, i) => (
+              <MangaCard
+                client:load
+                title={manga.title}
+                coverUrl={manga.coverUrl}
+                slug={manga.slug}
+                genres={manga.genres}
+                status={manga.status}
+                index={i}
+              />
+            ))}
+          </div>
+
+          <div class="flex items-center justify-center gap-3 mt-10">
+            {hasPrev && (
+              <a href={`/latest?page=${page - 1}`} class="yummy-btn-secondary inline-flex items-center gap-2">
+                <ArrowLeft class="w-4 h-4" /> Sebelumnya
+              </a>
+            )}
+            <span class="text-sm font-medium text-muted-foreground px-4">Halaman {page}</span>
+            {hasNext && (
+              <a href={`/latest?page=${page + 1}`} class="yummy-btn-secondary inline-flex items-center gap-2">
+                Selanjutnya <ArrowRight class="w-4 h-4" />
+              </a>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  </section>
+
+</EditorialLayout>
