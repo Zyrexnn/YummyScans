@@ -43,7 +43,7 @@ export default function GenreShowcase() {
           {genres.map((genre, i) => (
             <motion.a
               key={genre.slug}
-              href={`/search?genre=${genre.slug}`}
+              href={`/genre/${genre.slug}`}
               className="group relative overflow-hidden rounded-[16px] p-4 md:p-5 text-center no-underline transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}

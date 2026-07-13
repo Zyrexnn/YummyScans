@@ -49,6 +49,7 @@ export default function Navbar() {
             { href: '/', label: 'Beranda' },
             { href: '/search', label: 'Cari' },
             { href: '/genre', label: 'Genre' },
+            { href: '/latest', label: 'Terbaru' },
           ].map((link, i) => (
             <motion.a
               key={link.href}
@@ -123,6 +124,7 @@ export default function Navbar() {
                 { href: '/', label: 'Beranda' },
                 { href: '/search', label: 'Cari' },
                 { href: '/genre', label: 'Genre' },
+                { href: '/latest', label: 'Terbaru' },
               ].map((link, i) => (
                 <motion.a
                   key={link.href}
