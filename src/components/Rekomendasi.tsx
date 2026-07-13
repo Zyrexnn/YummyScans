@@ -75,14 +75,14 @@ export default function Rekomendasi({ manga }: { manga: LatestManga[] }) {
                       {parseDuration(m.updatedOn)}
                     </span>
                     {isNew(m.updatedOn) && (
-                      <span className="rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      <span className="rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground">
                         NEW
                       </span>
                     )}
                   </div>
 
                   {/* top-right flag */}
-                  <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded bg-white text-[11px] leading-none shadow">
+                  <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded bg-background text-[11px] leading-none shadow">
                     {FLAG[m.type as Tab] || '🏳️'}
                   </span>
 

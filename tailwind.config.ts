@@ -46,9 +46,9 @@ export default {
   			'block-mint': 'hsl(var(--block-mint))',
   			'block-coral': 'hsl(var(--block-coral))',
   			'block-navy': 'hsl(var(--block-navy))',
-  			'surface-soft': '#f7f7f5',
-  			hairline: '#e6e6e6',
-  			'hairline-soft': '#f1f1f1',
+			'surface-soft': 'hsl(var(--surface-soft))',
+			hairline: 'hsl(var(--hairline))',
+			'hairline-soft': 'hsl(var(--hairline-soft))',
   			'inverse-canvas': '#000000',
   			'inverse-ink': '#ffffff'
   		},

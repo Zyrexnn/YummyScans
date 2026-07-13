@@ -65,7 +65,7 @@ function pageUrl(p: number) {
       </div>
 
       {/* FILTERS */}
-      <div class="flex items-center gap-2 mb-8">
+      <div class="flex items-center gap-2 mb-8 flex-wrap">
         {TYPES.map(t => {
           const val = t === 'Semua' ? '' : t
           const active = (typeFilter === val) || (!typeFilter && t === 'Semua')

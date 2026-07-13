@@ -289,12 +289,12 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
                         t.style.display = 'none'
                       }}
                     />
-                    <span class="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-white text-[9px] leading-none shadow">
+                    <span class="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-background text-[10px] leading-none shadow">
                       {m.type === 'Manhwa' ? '🇰🇷' : m.type === 'Manhua' ? '🇨🇳' : '🇯🇵'}
                     </span>
                     <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-2 pt-6">
-                      <h3 class="line-clamp-2 text-[11px] font-bold leading-tight text-white">{m.title}</h3>
-                      {m.chapter && <p class="mt-0.5 truncate text-[9px] text-white/50">{m.chapter}</p>}
+                      <h3 class="line-clamp-2 text-[12px] font-bold leading-tight text-white">{m.title}</h3>
+                      {m.chapter && <p class="mt-0.5 truncate text-[10px] text-white/50">{m.chapter}</p>}
                     </div>
                   </div>
                 </a>

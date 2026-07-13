@@ -136,9 +136,9 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
                     </span>
                     <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
                       {isNew(m.updatedOn) && (
-                        <span className="rounded bg-red-600 px-1 py-0.5 text-[9px] font-bold text-white">N</span>
+                        <span className="rounded bg-destructive px-1 py-0.5 text-[10px] font-bold text-destructive-foreground">N</span>
                       )}
-                      <span className="flex h-4 w-4 items-center justify-center rounded bg-white text-[9px] leading-none shadow">
+                      <span className="flex h-4 w-4 items-center justify-center rounded bg-background text-[10px] leading-none shadow">
                         {FLAG[m.type] || '🏳️'}
                       </span>
                     </div>
@@ -146,7 +146,7 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
 
                   <h3 className="mt-2 line-clamp-2 text-[13px] font-bold leading-tight text-foreground">
                     {isNew(m.updatedOn) && (
-                      <span className="mr-1 rounded bg-red-600 px-1 text-[9px] font-bold text-white align-middle">
+                      <span className="mr-1 rounded bg-destructive px-1 text-[10px] font-bold text-destructive-foreground align-middle">
                         UP
                       </span>
                     )}
@@ -191,7 +191,7 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
                     </p>
                   </div>
                   {isNew(m.updatedOn) && (
-                    <span className="rounded bg-red-600 px-1.5 py-0.5 text-[9px] font-bold text-white">UP</span>
+                    <span className="rounded bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground">UP</span>
                   )}
                 </a>
               ))}

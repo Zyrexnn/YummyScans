@@ -62,8 +62,8 @@ function Dots({ count, active, onChange }: { count: number; active: number; onCh
           aria-label={`Go to slide ${i + 1}`}
           className={
             i === active
-              ?               'h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-accent/40'
-              : 'h-1.5 w-1.5 rounded-full bg-white/40'
+              ? 'h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-accent/40'
+              : 'h-1.5 w-1.5 rounded-full bg-foreground/40'
           }
         />
       ))}

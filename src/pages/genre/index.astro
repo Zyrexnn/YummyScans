@@ -125,20 +125,20 @@ try {
   {/* FEATURED GENRES */}
   <section class="bg-background pb-12">
     <div class="max-w-[1280px] mx-auto px-6">
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {FEATURED.map((g, i) => (
           <a
             href={`/genre/${g.slug}`}
             class={`group relative overflow-hidden rounded-2xl p-5 md:p-6 no-underline transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${g.color}`}
           >
             <div class="relative z-10">
-              <div class="w-10 h-10 md:w-12 md:h-12 bg-white/25 rounded-xl flex items-center justify-center mb-3">
+              <div class="w-10 h-10 md:w-12 md:h-12 bg-foreground/15 rounded-xl flex items-center justify-center mb-3">
                 <g.icon class="w-5 h-5 md:w-6 md:h-6 text-foreground" />
               </div>
               <h3 class="text-[15px] md:text-base font-bold text-foreground mb-1">{g.name}</h3>
               <p class="text-[11px] md:text-xs text-foreground/60 leading-snug">{g.desc}</p>
             </div>
-            <div class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+            <div class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
           </a>
         ))}
       </div>
@@ -155,7 +155,7 @@ try {
             Lihat Semua <ArrowRight class="w-3 h-3" />
           </a>
         </div>
-        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
           {recommendedManga.map((m, i) => (
             <a
               href={`/manga/${m.slug}`}
@@ -169,12 +169,12 @@ try {
                   class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                 />
-                <span class="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-white text-[9px] leading-none shadow">
+                <span class="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-background text-[10px] leading-none shadow">
                   {m.type === 'Manhwa' ? '🇰🇷' : m.type === 'Manhua' ? '🇨🇳' : '🇯🇵'}
                 </span>
                 <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-2 pt-6">
-                  <h3 class="line-clamp-2 text-[11px] font-bold leading-tight text-white">{m.title}</h3>
-                  {m.chapter && <p class="mt-0.5 truncate text-[9px] text-white/50">{m.chapter}</p>}
+                  <h3 class="line-clamp-2 text-[12px] font-bold leading-tight text-white">{m.title}</h3>
+                  {m.chapter && <p class="mt-0.5 truncate text-[10px] text-white/50">{m.chapter}</p>}
                 </div>
               </div>
             </a>

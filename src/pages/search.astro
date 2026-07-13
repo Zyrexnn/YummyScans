@@ -157,7 +157,7 @@ const hasFilters = (typeFilter && typeFilter !== 'Semua') || genreFilter || quer
       </form>
 
       {/* TYPE FILTERS */}
-      <div class="flex items-center justify-center gap-2 mb-6">
+      <div class="flex items-center justify-center gap-2 mb-6 flex-wrap">
         {TYPES.map(t => {
           const val = t === 'Semua' ? '' : t
           const active = (!typeFilter && t === 'Semua') || (typeFilter === val && val !== '')

@@ -60,7 +60,7 @@ export default function MangaCard({
           )}
 
           {/* Shimmer */}
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
         </div>
 
         {/* Status Badge */}
