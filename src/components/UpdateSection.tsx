@@ -67,7 +67,7 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
               aria-label="Grid view"
               className={
                 'flex h-9 w-9 items-center justify-center rounded-lg transition ' +
-                (view === 'grid' ? 'bg-[#6d28d9] text-white' : 'bg-secondary text-foreground/70')
+                (view === 'grid' ? 'bg-foreground text-background' : 'bg-secondary text-foreground/70')
               }
             >
               <LayoutGrid className="h-4 w-4" />
@@ -77,7 +77,7 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
               aria-label="List view"
               className={
                 'flex h-9 w-9 items-center justify-center rounded-lg transition ' +
-                (view === 'list' ? 'bg-[#6d28d9] text-white' : 'bg-secondary text-foreground/70')
+                (view === 'list' ? 'bg-foreground text-background' : 'bg-secondary text-foreground/70')
               }
             >
               <List className="h-4 w-4" />
@@ -96,7 +96,7 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
               }}
               className={
                 'rounded-full px-5 py-2 text-sm font-semibold transition ' +
-                (tab === t ? 'bg-[#6d28d9] text-white' : 'bg-secondary text-foreground/70 hover:bg-muted')
+                (tab === t ? 'bg-foreground text-background' : 'bg-secondary text-foreground/70 hover:bg-muted')
               }
             >
               {t}
@@ -222,7 +222,7 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
               onClick={() => setPage(i + 1)}
               className={
                 'h-9 min-w-9 rounded-lg px-2 text-sm font-semibold transition ' +
-                (page === i + 1 ? 'bg-[#6d28d9] text-white' : 'bg-secondary text-foreground/70 hover:bg-muted')
+                (page === i + 1 ? 'bg-foreground text-background' : 'bg-secondary text-foreground/70 hover:bg-muted')
               }
             >
               {i + 1}

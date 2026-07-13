@@ -1,108 +1,210 @@
 ---
 import EditorialLayout from '../../layouts/EditorialLayout.astro'
-import { fetchGenreList } from '../../lib/komiku'
-import { Swords, Mountain, Drama, Wand2, Ghost, Heart, Rocket, Coffee, Trophy, Zap, Skull, Search, BookOpen, Sparkles } from 'lucide-react'
+import MangaCard from '../../components/MangaCard'
+import { fetchGenreManga } from '../../lib/komiku'
+import {
+  Swords, Mountain, Drama, Wand2, Ghost, Heart, Rocket, Coffee, Trophy, Zap,
+  Skull, Search, Sparkles, CookingPot, Crown, Shield, Crosshair,
+  Users, Flame, Music, Brain, Atom, GraduationCap, HeartPulse, Landmark,
+  ArrowRight
+} from 'lucide-react'
 
-const genreIcons: Record<string, any> = {
-  'action': Swords,
-  'adventure': Mountain,
-  'comedy': Drama,
-  'fantasy': Wand2,
-  'horror': Ghost,
-  'romance': Heart,
-  'sci-fi': Rocket,
-  'slice-of-life': Coffee,
-  'sports': Trophy,
-  'supernatural': Zap,
-  'thriller': Skull,
-  'mystery': Search,
-  'drama': Drama,
-  'shounen': Sparkles,
-  'school-life': BookOpen,
-  'seinen': BookOpen,
-  'martial-arts': Swords,
-}
+const FEATURED = [
+  { name: 'Action', slug: 'action', icon: Swords, color: 'bg-block-coral', desc: 'Pertarungan epik dan aksi mendebarkan' },
+  { name: 'Romance', slug: 'romance', icon: Heart, color: 'bg-block-pink', desc: 'Kisah cinta yang mengharukan' },
+  { name: 'Fantasy', slug: 'fantasy', icon: Wand2, color: 'bg-block-lilac', desc: 'Dunia sihir dan petualangan' },
+  { name: 'Isekai', slug: 'isekai', icon: Rocket, color: 'bg-block-mint', desc: 'Reinkarnasi ke dunia baru' },
+]
 
-const genreColors: Record<string, string> = {
-  'action': 'bg-block-coral',
-  'adventure': 'bg-block-lime',
-  'comedy': 'bg-block-cream',
-  'fantasy': 'bg-block-lilac',
-  'horror': 'bg-block-navy',
-  'romance': 'bg-block-pink',
-  'sci-fi': 'bg-block-mint',
-  'slice-of-life': 'bg-block-cream',
-  'sports': 'bg-block-lime',
-  'supernatural': 'bg-block-lilac',
-  'thriller': 'bg-block-coral',
-  'mystery': 'bg-block-mint',
-  'drama': 'bg-block-coral',
-  'shounen': 'bg-block-lime',
-  'school-life': 'bg-block-cream',
-  'seinen': 'bg-block-navy',
-  'martial-arts': 'bg-block-coral',
-}
+const GENRE_GROUPS = [
+  {
+    label: 'Populer',
+    genres: [
+      { name: 'Action', slug: 'action', icon: Swords, color: 'bg-block-coral' },
+      { name: 'Romance', slug: 'romance', icon: Heart, color: 'bg-block-pink' },
+      { name: 'Comedy', slug: 'comedy', icon: Drama, color: 'bg-block-cream' },
+      { name: 'Fantasy', slug: 'fantasy', icon: Wand2, color: 'bg-block-lilac' },
+      { name: 'Isekai', slug: 'isekai', icon: Rocket, color: 'bg-block-mint' },
+      { name: 'Shounen', slug: 'shounen', icon: Zap, color: 'bg-block-lime' },
+      { name: 'Drama', slug: 'drama', icon: Drama, color: 'bg-block-coral' },
+      { name: 'Martial Arts', slug: 'martial-arts', icon: Swords, color: 'bg-block-coral' },
+    ]
+  },
+  {
+    label: 'Romantis & Slice of Life',
+    genres: [
+      { name: 'Harem', slug: 'harem', icon: Heart, color: 'bg-block-pink' },
+      { name: 'Shoujo', slug: 'shoujo', icon: Heart, color: 'bg-block-pink' },
+      { name: 'Josei', slug: 'josei', icon: Crown, color: 'bg-block-lilac' },
+      { name: 'School', slug: 'school', icon: GraduationCap, color: 'bg-block-lime' },
+      { name: 'Slice of Life', slug: 'slice-of-life', icon: Coffee, color: 'bg-block-cream' },
+      { name: 'Ecchi', slug: 'ecchi', icon: Flame, color: 'bg-block-pink' },
+    ]
+  },
+  {
+    label: 'Aksi & Petualangan',
+    genres: [
+      { name: 'Adventure', slug: 'adventure', icon: Mountain, color: 'bg-block-lime' },
+      { name: 'Super Power', slug: 'super-power', icon: Zap, color: 'bg-block-lilac' },
+      { name: 'Sports', slug: 'sports', icon: Trophy, color: 'bg-block-lime' },
+      { name: 'Samurai', slug: 'samurai', icon: Swords, color: 'bg-block-coral' },
+      { name: 'Military', slug: 'military', icon: Shield, color: 'bg-block-navy' },
+      { name: 'Police', slug: 'police', icon: Shield, color: 'bg-block-navy' },
+    ]
+  },
+  {
+    label: 'Supernatural & Sci-Fi',
+    genres: [
+      { name: 'Supernatural', slug: 'supernatural', icon: Zap, color: 'bg-block-lilac' },
+      { name: 'Magic', slug: 'magic', icon: Wand2, color: 'bg-block-lilac' },
+      { name: 'Demons', slug: 'demons', icon: Skull, color: 'bg-block-navy' },
+      { name: 'Vampire', slug: 'vampire', icon: Skull, color: 'bg-block-navy' },
+      { name: 'Sci-Fi', slug: 'sci-fi', icon: Atom, color: 'bg-block-mint' },
+      { name: 'Mecha', slug: 'mecha', icon: Shield, color: 'bg-block-mint' },
+      { name: 'Space', slug: 'space', icon: Rocket, color: 'bg-block-mint' },
+    ]
+  },
+  {
+    label: 'Drama & Psikologis',
+    genres: [
+      { name: 'Horror', slug: 'horror', icon: Ghost, color: 'bg-block-navy' },
+      { name: 'Thriller', slug: 'thriller', icon: Skull, color: 'bg-block-coral' },
+      { name: 'Mystery', slug: 'mystery', icon: Search, color: 'bg-block-mint' },
+      { name: 'Psychological', slug: 'psychological', icon: Brain, color: 'bg-block-lilac' },
+      { name: 'Tragedy', slug: 'tragedy', icon: Drama, color: 'bg-block-navy' },
+      { name: 'Historical', slug: 'historical', icon: Landmark, color: 'bg-block-cream' },
+    ]
+  },
+  {
+    label: 'Lainnya',
+    genres: [
+      { name: 'Cooking', slug: 'cooking', icon: CookingPot, color: 'bg-block-cream' },
+      { name: 'Medical', slug: 'medical', icon: HeartPulse, color: 'bg-block-pink' },
+      { name: 'Music', slug: 'music', icon: Music, color: 'bg-block-lime' },
+      { name: 'Parody', slug: 'parody', icon: Drama, color: 'bg-block-cream' },
+      { name: 'Seinen', slug: 'seinen', icon: Users, color: 'bg-block-navy' },
+      { name: 'One Shot', slug: 'one-shot', icon: Crosshair, color: 'bg-block-cream' },
+      { name: 'Webtoon', slug: 'webtoon', icon: Rocket, color: 'bg-block-mint' },
+      { name: 'Gender Bender', slug: 'gender-bender', icon: Users, color: 'bg-block-pink' },
+      { name: 'Mature', slug: 'mature', icon: Skull, color: 'bg-block-navy' },
+      { name: 'Shoujo Ai', slug: 'shoujo-ai', icon: Heart, color: 'bg-block-pink' },
+      { name: 'Shounen Ai', slug: 'shounen-ai', icon: Heart, color: 'bg-block-lilac' },
+      { name: 'Yaoi', slug: 'yaoi', icon: Heart, color: 'bg-block-lilac' },
+      { name: 'Yuri', slug: 'yuri', icon: Heart, color: 'bg-block-pink' },
+    ]
+  },
+]
 
-let genres: { name: string; slug: string; count: string }[] = []
-let error: string | null = null
-
+let recommendedManga: { title: string; slug: string; coverUrl: string; type: string; chapter: string }[] = []
 try {
-  genres = await fetchGenreList()
-} catch (e: any) {
-  error = e.message || 'Failed to load genres'
-}
+  const items = await fetchGenreManga('action', 1)
+  recommendedManga = items.slice(0, 6).map(m => ({
+    title: m.title, slug: m.slug, coverUrl: m.coverUrl, type: m.type, chapter: m.chapter,
+  }))
+} catch {}
 ---
 
 <EditorialLayout title="Genre - YummyScans" description="Jelajahi manga berdasarkan genre favoritmu">
 
-  <section class="section-spacing bg-background">
+  {/* HERO */}
+  <section class="bg-background pt-10 pb-6">
     <div class="max-w-[1280px] mx-auto px-6">
-      <div class="text-center mb-12">
+      <div class="text-center mb-6">
         <div class="text-eyebrow text-muted-foreground mb-3 flex items-center justify-center gap-2">
           <Sparkles class="w-4 h-4" />
-          Koleksi Lengkap
+          46 Genre Tersedia
         </div>
-        <h1 class="text-display-lg mb-4">Jelajahi Genre</h1>
-        <p class="text-body-lg text-muted-foreground max-w-xl mx-auto">
-          Temukan manga favoritmu dari berbagai genre yang tersedia.
+        <h1 class="text-display-lg mb-3">Jelajahi Genre</h1>
+        <p class="text-body text-muted-foreground max-w-md mx-auto">
+          Temukan manga favoritmu berdasarkan genre yang kamu suka.
         </p>
       </div>
+    </div>
+  </section>
 
-      {error ? (
-        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
-          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
-            <BookOpen class="w-8 h-8 text-muted-foreground" />
-          </div>
-          <p class="text-headline mb-2">Gagal memuat genre</p>
-          <p class="text-body-sm text-muted-foreground mb-4">{error}</p>
-          <a href="/genre" class="yummy-btn-secondary inline-block">Coba Lagi</a>
+  {/* FEATURED GENRES */}
+  <section class="bg-background pb-12">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {FEATURED.map((g, i) => (
+          <a
+            href={`/genre/${g.slug}`}
+            class={`group relative overflow-hidden rounded-2xl p-5 md:p-6 no-underline transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${g.color}`}
+          >
+            <div class="relative z-10">
+              <div class="w-10 h-10 md:w-12 md:h-12 bg-white/25 rounded-xl flex items-center justify-center mb-3">
+                <g.icon class="w-5 h-5 md:w-6 md:h-6 text-foreground" />
+              </div>
+              <h3 class="text-[15px] md:text-base font-bold text-foreground mb-1">{g.name}</h3>
+              <p class="text-[11px] md:text-xs text-foreground/60 leading-snug">{g.desc}</p>
+            </div>
+            <div class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* REKOMENDASI */}
+  {recommendedManga.length > 0 && (
+    <section class="bg-secondary/30 py-12">
+      <div class="max-w-[1280px] mx-auto px-6">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-headline">Populer di Action</h2>
+          <a href="/genre/action" class="text-xs text-muted-foreground hover:text-foreground transition flex items-center gap-1">
+            Lihat Semua <ArrowRight class="w-3 h-3" />
+          </a>
         </div>
-      ) : (
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-          {genres.map((genre, i) => {
-            const Icon = genreIcons[genre.slug] || BookOpen
-            const color = genreColors[genre.slug] || 'bg-block-cream'
-            return (
-              <a
-                href={`/genre/${genre.slug}`}
-                class={`group relative overflow-hidden rounded-[20px] p-5 md:p-6 no-underline transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${color}`}
-                style={`animation-delay: ${i * 50}ms`}
-              >
-                <div class="relative z-10">
-                  <div class="w-10 h-10 bg-white/20 rounded-[12px] flex items-center justify-center mb-3">
-                    <Icon class="w-5 h-5 text-foreground" />
-                  </div>
-                  <h3 class="text-[15px] font-bold text-foreground mb-1">{genre.name}</h3>
-                  {genre.count && (
-                    <p class="text-xs text-foreground/60 font-medium">{genre.count} komik</p>
-                  )}
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+          {recommendedManga.map((m, i) => (
+            <a
+              href={`/manga/${m.slug}`}
+              class="group block"
+            >
+              <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-secondary">
+                <img
+                  src={m.coverUrl}
+                  alt={m.title}
+                  loading="lazy"
+                  class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+                <span class="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-white text-[9px] leading-none shadow">
+                  {m.type === 'Manhwa' ? '🇰🇷' : m.type === 'Manhua' ? '🇨🇳' : '🇯🇵'}
+                </span>
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-2 pt-6">
+                  <h3 class="line-clamp-2 text-[11px] font-bold leading-tight text-white">{m.title}</h3>
+                  {m.chapter && <p class="mt-0.5 truncate text-[9px] text-white/50">{m.chapter}</p>}
                 </div>
-                <div class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-              </a>
-            )
-          })}
+              </div>
+            </a>
+          ))}
         </div>
-      )}
+      </div>
+    </section>
+  )}
+
+  {/* GENRE GROUPS */}
+  <section class="bg-background py-12">
+    <div class="max-w-[1280px] mx-auto px-6 space-y-10">
+      {GENRE_GROUPS.map((group) => (
+        <div>
+          <h3 class="text-[13px] font-mono uppercase tracking-wider text-muted-foreground mb-3">{group.label}</h3>
+          <div class="flex flex-wrap gap-2">
+            {group.genres.map((g) => (
+              <a
+                href={`/genre/${g.slug}`}
+                class={`group relative overflow-hidden rounded-xl px-4 py-2.5 no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${g.color}`}
+              >
+                <div class="relative z-10 flex items-center gap-2">
+                  <g.icon class="w-3.5 h-3.5 text-foreground/70" />
+                  <span class="text-[13px] font-semibold text-foreground">{g.name}</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   </section>
 

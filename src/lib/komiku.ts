@@ -246,24 +246,57 @@ export async function fetchGenreManga(genreSlug: string, page = 1): Promise<Late
   return parseCards($)
 }
 
+export async function fetchByType(type: string, page = 1): Promise<LatestManga[]> {
+  const slug = type.toLowerCase()
+  const path = page === 1 ? `/tipe/${slug}/` : `/tipe/${slug}/page/${page}/`
+  const html = await fetchHTML(BASE_URL + path)
+  const $ = cheerio.load(html)
+  return parseCards($)
+}
+
+export async function fetchByGenreAndType(genreSlug: string, type: string, page = 1): Promise<LatestManga[]> {
+  const tipe = type.toLowerCase()
+  const url = page === 1
+    ? `${BASE_URL}/komik/?genre=${genreSlug}&tipe=${tipe}`
+    : `${BASE_URL}/komik/page/${page}/?genre=${genreSlug}&tipe=${tipe}`
+  const html = await fetchHTML(url)
+  const $ = cheerio.load(html)
+  return parseCards($)
+}
+
 export async function fetchGenreList(): Promise<{ name: string; slug: string; count: string }[]> {
   const html = await fetchHTML(BASE_URL)
   const $ = cheerio.load(html)
   const genres: { name: string; slug: string; count: string }[] = []
+  const seen = new Set<string>()
 
   $('a[href*="/genre/"]').each((_idx, el) => {
     const href = $(el).attr('href') || ''
     const slugMatch = href.match(/\/genre\/([^/]+)\/?/)
     if (slugMatch) {
       const slug = slugMatch[1]
+      if (seen.has(slug)) return
       const text = $(el).text().trim()
       const countMatch = text.match(/(\d+)\s*komik/i)
       const name = text.replace(/\d+\s*komik/i, '').replace(/Lihat semua\s*→?/i, '').trim()
-      if (name && name.length < 30 && !genres.find(g => g.slug === slug)) {
+      if (name && name.length < 30) {
+        seen.add(slug)
         genres.push({ name, slug, count: countMatch ? countMatch[1] : '' })
       }
     }
   })
 
   return genres
+}
+
+export async function fetchGenreCount(genreSlug: string): Promise<number> {
+  try {
+    const html = await fetchHTML(`${BASE_URL}/genre/${genreSlug}/`)
+    const $ = cheerio.load(html)
+    const pageText = $('body').text()
+    const countMatch = pageText.match(/(\d+)\s*komik/i)
+    return countMatch ? parseInt(countMatch[1], 10) : $('.mk-card').length || 0
+  } catch {
+    return 0
+  }
 }

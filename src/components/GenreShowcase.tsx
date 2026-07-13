@@ -3,22 +3,52 @@
 import { motion } from 'framer-motion'
 import {
   Swords, Mountain, Drama, Wand2, Ghost, Search,
-  Heart, Rocket, Coffee, Trophy, Zap, Skull
+  Heart, Rocket, Coffee, Trophy, Zap, Skull,
+  CookingPot, Crown, Shield, Crosshair, Users,
+  Flame, Music, Brain, Atom, GraduationCap,
+  HeartPulse, Landmark
 } from 'lucide-react'
 
 const genres = [
   { name: 'Action', slug: 'action', icon: Swords, color: 'bg-block-coral' },
   { name: 'Adventure', slug: 'adventure', icon: Mountain, color: 'bg-block-lime' },
   { name: 'Comedy', slug: 'comedy', icon: Drama, color: 'bg-block-cream' },
+  { name: 'Cooking', slug: 'cooking', icon: CookingPot, color: 'bg-block-cream' },
+  { name: 'Demons', slug: 'demons', icon: Skull, color: 'bg-block-navy' },
+  { name: 'Drama', slug: 'drama', icon: Drama, color: 'bg-block-coral' },
+  { name: 'Ecchi', slug: 'ecchi', icon: Flame, color: 'bg-block-pink' },
   { name: 'Fantasy', slug: 'fantasy', icon: Wand2, color: 'bg-block-lilac' },
+  { name: 'Harem', slug: 'harem', icon: Heart, color: 'bg-block-pink' },
+  { name: 'Historical', slug: 'historical', icon: Landmark, color: 'bg-block-cream' },
   { name: 'Horror', slug: 'horror', icon: Ghost, color: 'bg-block-navy' },
+  { name: 'Isekai', slug: 'isekai', icon: Rocket, color: 'bg-block-mint' },
+  { name: 'Josei', slug: 'josei', icon: Crown, color: 'bg-block-lilac' },
+  { name: 'Magic', slug: 'magic', icon: Wand2, color: 'bg-block-lilac' },
+  { name: 'Martial Arts', slug: 'martial-arts', icon: Swords, color: 'bg-block-coral' },
+  { name: 'Mature', slug: 'mature', icon: Skull, color: 'bg-block-navy' },
+  { name: 'Mecha', slug: 'mecha', icon: Shield, color: 'bg-block-mint' },
+  { name: 'Medical', slug: 'medical', icon: HeartPulse, color: 'bg-block-pink' },
+  { name: 'Military', slug: 'military', icon: Shield, color: 'bg-block-navy' },
+  { name: 'Music', slug: 'music', icon: Music, color: 'bg-block-lime' },
+  { name: 'Mystery', slug: 'mystery', icon: Search, color: 'bg-block-mint' },
+  { name: 'One Shot', slug: 'one-shot', icon: Crosshair, color: 'bg-block-cream' },
+  { name: 'Police', slug: 'police', icon: Shield, color: 'bg-block-navy' },
+  { name: 'Psychological', slug: 'psychological', icon: Brain, color: 'bg-block-lilac' },
   { name: 'Romance', slug: 'romance', icon: Heart, color: 'bg-block-pink' },
-  { name: 'Sci-Fi', slug: 'sci-fi', icon: Rocket, color: 'bg-block-mint' },
+  { name: 'Samurai', slug: 'samurai', icon: Swords, color: 'bg-block-coral' },
+  { name: 'School', slug: 'school', icon: GraduationCap, color: 'bg-block-lime' },
+  { name: 'Sci-Fi', slug: 'sci-fi', icon: Atom, color: 'bg-block-mint' },
+  { name: 'Seinen', slug: 'seinen', icon: Users, color: 'bg-block-navy' },
+  { name: 'Shoujo', slug: 'shoujo', icon: Heart, color: 'bg-block-pink' },
+  { name: 'Shounen', slug: 'shounen', icon: Zap, color: 'bg-block-lime' },
   { name: 'Slice of Life', slug: 'slice-of-life', icon: Coffee, color: 'bg-block-cream' },
   { name: 'Sports', slug: 'sports', icon: Trophy, color: 'bg-block-lime' },
+  { name: 'Super Power', slug: 'super-power', icon: Zap, color: 'bg-block-lilac' },
   { name: 'Supernatural', slug: 'supernatural', icon: Zap, color: 'bg-block-lilac' },
   { name: 'Thriller', slug: 'thriller', icon: Skull, color: 'bg-block-coral' },
-  { name: 'Mystery', slug: 'mystery', icon: Search, color: 'bg-block-mint' },
+  { name: 'Tragedy', slug: 'tragedy', icon: Drama, color: 'bg-block-navy' },
+  { name: 'Vampire', slug: 'vampire', icon: Skull, color: 'bg-block-navy' },
+  { name: 'Webtoon', slug: 'webtoon', icon: Rocket, color: 'bg-block-mint' },
 ]
 
 export default function GenreShowcase() {

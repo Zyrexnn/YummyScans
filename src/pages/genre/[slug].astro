@@ -1,38 +1,61 @@
 ---
 import EditorialLayout from '../../layouts/EditorialLayout.astro'
 import MangaCard from '../../components/MangaCard'
-import { fetchGenreManga } from '../../lib/komiku'
+import { fetchGenreManga, fetchByGenreAndType } from '../../lib/komiku'
 import { ArrowLeft, ArrowRight, BookOpen, Tag } from 'lucide-react'
 
+const TYPES = ['Semua', 'Manhwa', 'Manga', 'Manhua']
 const { slug } = Astro.params
 const page = parseInt(Astro.url.searchParams.get('page') || '1')
+const typeFilter = Astro.url.searchParams.get('type') || ''
 
 let mangaList: any[] = []
 let error: string | null = null
+let hasMore = false
+
+const mapFn = (m: any) => ({
+  id: m.slug, title: m.title, slug: m.slug, coverUrl: m.coverUrl,
+  status: m.type || 'ongoing', genres: [{ id: '', name: m.type || '', slug: '' }],
+})
 
 try {
-  const items = await fetchGenreManga(slug!, page)
-  mangaList = items.map(m => ({
-    id: m.slug,
-    title: m.title,
-    slug: m.slug,
-    coverUrl: m.coverUrl,
-    status: m.type || 'ongoing',
-    genres: [{ id: '', name: m.type || '', slug: '' }],
-  }))
+  if (!typeFilter || typeFilter === 'Semua') {
+    const [currentPage, nextPage] = await Promise.all([fetchGenreManga(slug!, page), fetchGenreManga(slug!, page + 1)])
+    mangaList = currentPage.map(mapFn)
+    hasMore = nextPage.length > 0
+  } else {
+    const [currentPage, nextPage] = await Promise.all([fetchByGenreAndType(slug!, typeFilter, page), fetchByGenreAndType(slug!, typeFilter, page + 1)])
+    mangaList = currentPage.map(mapFn)
+    hasMore = nextPage.length > 0
+  }
 } catch (e: any) {
   error = e.message || 'Failed to load manga'
 }
 
+function buildUrl(params: Record<string, string>) {
+  const u = new URL(Astro.url.href)
+  for (const [k, v] of Object.entries(params)) {
+    if (v) u.searchParams.set(k, v)
+    else u.searchParams.delete(k)
+  }
+  u.searchParams.delete('page')
+  return u.pathname + u.search
+}
+
 const genreName = slug?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || ''
-const hasPrev = page > 1
-const hasNext = mangaList.length >= 10
+
+function pageUrl(p: number) {
+  const u = new URL(Astro.url.origin + Astro.url.pathname)
+  if (typeFilter && typeFilter !== 'Semua') u.searchParams.set('type', typeFilter)
+  u.searchParams.set('page', String(p))
+  return u.pathname + u.search
+}
 ---
 
 <EditorialLayout title={`${genreName} - YummyScans`} description={`Baca manga genre ${genreName} Sub Indo`}>
   <section class="section-spacing bg-background">
     <div class="max-w-[1280px] mx-auto px-6">
-      <div class="mb-8">
+      <div class="mb-6">
         <a href="/genre" class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors no-underline mb-4">
           <ArrowLeft class="w-4 h-4" /> Semua Genre
         </a>
@@ -42,6 +65,24 @@ const hasNext = mangaList.length >= 10
           </div>
           <h1 class="text-display-lg">{genreName}</h1>
         </div>
+      </div>
+
+      {/* FILTERS */}
+      <div class="flex items-center gap-2 mb-8">
+        {TYPES.map(t => {
+          const val = t === 'Semua' ? '' : t
+          const active = (typeFilter === val) || (!typeFilter && t === 'Semua')
+          return (
+            <a
+              href={active ? buildUrl({}) : buildUrl({ type: val })}
+              class={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                active ? 'bg-foreground text-background' : 'bg-secondary text-foreground/70 hover:bg-muted'
+              }`}
+            >
+              {t}
+            </a>
+          )
+        })}
       </div>
 
       {error ? (
@@ -59,11 +100,22 @@ const hasNext = mangaList.length >= 10
             <BookOpen class="w-8 h-8 text-muted-foreground" />
           </div>
           <p class="text-headline mb-2">Tidak ada manga</p>
-          <p class="text-body-sm text-muted-foreground mb-4">Genre ini belum memiliki manga.</p>
-          <a href="/genre" class="yummy-btn-secondary inline-block">Kembali ke Genre</a>
+          <p class="text-body-sm text-muted-foreground mb-4">
+            {typeFilter && typeFilter !== 'Semua'
+              ? `Tidak ada ${typeFilter} di genre ${genreName}.`
+              : `Genre ${genreName} belum memiliki manga.`}
+          </p>
+          {typeFilter && typeFilter !== 'Semua' ? (
+            <a href={buildUrl({})} class="yummy-btn-secondary inline-block">Lihat Semua</a>
+          ) : (
+            <a href="/genre" class="yummy-btn-secondary inline-block">Kembali ke Genre</a>
+          )}
         </div>
       ) : (
         <>
+          <p class="text-xs text-muted-foreground mb-4">
+            {typeFilter && typeFilter !== 'Semua' ? typeFilter : 'Semua'} &middot; Halaman {page}
+          </p>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6">
             {mangaList.map((manga, i) => (
               <MangaCard
@@ -79,14 +131,14 @@ const hasNext = mangaList.length >= 10
           </div>
 
           <div class="flex items-center justify-center gap-3 mt-10">
-            {hasPrev && (
-              <a href={`/genre/${slug}?page=${page - 1}`} class="yummy-btn-secondary inline-flex items-center gap-2">
+            {page > 1 && (
+              <a href={pageUrl(page - 1)} class="yummy-btn-secondary inline-flex items-center gap-2">
                 <ArrowLeft class="w-4 h-4" /> Sebelumnya
               </a>
             )}
             <span class="text-sm font-medium text-muted-foreground px-4">Halaman {page}</span>
-            {hasNext && (
-              <a href={`/genre/${slug}?page=${page + 1}`} class="yummy-btn-secondary inline-flex items-center gap-2">
+            {hasMore && (
+              <a href={pageUrl(page + 1)} class="yummy-btn-secondary inline-flex items-center gap-2">
                 Selanjutnya <ArrowRight class="w-4 h-4" />
               </a>
             )}

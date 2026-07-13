@@ -62,7 +62,7 @@ function Dots({ count, active, onChange }: { count: number; active: number; onCh
           aria-label={`Go to slide ${i + 1}`}
           className={
             i === active
-              ? 'h-2.5 w-2.5 rounded-full bg-[#a855f7] ring-2 ring-[#a855f7]/40'
+              ?               'h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-accent/40'
               : 'h-1.5 w-1.5 rounded-full bg-white/40'
           }
         />
@@ -101,10 +101,10 @@ export default function Hero() {
                     <h2 className="text-2xl font-bold text-white md:text-4xl">{s.title}</h2>
                     <div className="flex items-center gap-3">
                       <span className="inline-flex items-center gap-1 text-sm font-semibold text-white">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <Star className="h-4 w-4 fill-accent text-accent" />
                         {s.rating.toFixed(1)}
                       </span>
-                      <span className="rounded-full bg-orange-500/90 px-3 py-0.5 text-xs font-semibold text-white">
+                      <span className="rounded-full bg-accent/90 px-3 py-0.5 text-xs font-semibold text-accent-foreground">
                         {s.genre}
                       </span>
                     </div>

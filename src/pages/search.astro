@@ -1,86 +1,266 @@
 ---
 import EditorialLayout from '../layouts/EditorialLayout.astro'
 import MangaCard from '../components/MangaCard'
-import { fetchSearch } from '../lib/komiku'
-import { Search as SearchIcon, BookOpen } from 'lucide-react'
+import { fetchSearch, fetchGenreManga, fetchByType, fetchByGenreAndType } from '../lib/komiku'
+import { Search as SearchIcon, BookOpen, X, SlidersHorizontal, Swords, Mountain, Drama, Wand2, Ghost, Heart, Rocket, Coffee, Trophy, Zap, Skull, CookingPot, Flame, Music, Brain, Atom, GraduationCap, Shield, Crown, Users, Landmark, Search, Crosshair } from 'lucide-react'
 
 const query = Astro.url.searchParams.get('q') || ''
+const typeFilter = Astro.url.searchParams.get('type') || ''
+const genreFilter = Astro.url.searchParams.get('genre') || ''
+const page = parseInt(Astro.url.searchParams.get('page') || '1', 10)
+
+const TYPES = ['Semua', 'Manhwa', 'Manga', 'Manhua']
+
+const GENRE_LIST = [
+  { name: 'Action', slug: 'action', icon: Swords },
+  { name: 'Adventure', slug: 'adventure', icon: Mountain },
+  { name: 'Comedy', slug: 'comedy', icon: Drama },
+  { name: 'Cooking', slug: 'cooking', icon: CookingPot },
+  { name: 'Demons', slug: 'demons', icon: Skull },
+  { name: 'Drama', slug: 'drama', icon: Drama },
+  { name: 'Ecchi', slug: 'ecchi', icon: Flame },
+  { name: 'Fantasy', slug: 'fantasy', icon: Wand2 },
+  { name: 'Harem', slug: 'harem', icon: Heart },
+  { name: 'Historical', slug: 'historical', icon: Landmark },
+  { name: 'Horror', slug: 'horror', icon: Ghost },
+  { name: 'Isekai', slug: 'isekai', icon: Rocket },
+  { name: 'Josei', slug: 'josei', icon: Crown },
+  { name: 'Magic', slug: 'magic', icon: Wand2 },
+  { name: 'Martial Arts', slug: 'martial-arts', icon: Swords },
+  { name: 'Mature', slug: 'mature', icon: Skull },
+  { name: 'Mecha', slug: 'mecha', icon: Shield },
+  { name: 'Medical', slug: 'medical', icon: Heart },
+  { name: 'Military', slug: 'military', icon: Shield },
+  { name: 'Music', slug: 'music', icon: Music },
+  { name: 'Mystery', slug: 'mystery', icon: Search },
+  { name: 'One Shot', slug: 'one-shot', icon: Crosshair },
+  { name: 'Police', slug: 'police', icon: Shield },
+  { name: 'Psychological', slug: 'psychological', icon: Brain },
+  { name: 'Romance', slug: 'romance', icon: Heart },
+  { name: 'Samurai', slug: 'samurai', icon: Swords },
+  { name: 'School', slug: 'school', icon: GraduationCap },
+  { name: 'Sci-Fi', slug: 'sci-fi', icon: Atom },
+  { name: 'Seinen', slug: 'seinen', icon: Users },
+  { name: 'Shoujo', slug: 'shoujo', icon: Heart },
+  { name: 'Shounen', slug: 'shounen', icon: Zap },
+  { name: 'Slice of Life', slug: 'slice-of-life', icon: Coffee },
+  { name: 'Sports', slug: 'sports', icon: Trophy },
+  { name: 'Super Power', slug: 'super-power', icon: Zap },
+  { name: 'Supernatural', slug: 'supernatural', icon: Zap },
+  { name: 'Thriller', slug: 'thriller', icon: Skull },
+  { name: 'Tragedy', slug: 'tragedy', icon: Drama },
+  { name: 'Vampire', slug: 'vampire', icon: Skull },
+  { name: 'Webtoon', slug: 'webtoon', icon: Rocket },
+]
 
 let results: any[] = []
 let error: string | null = null
+let hasMore = false
 
-if (query) {
+const mapFn = (m: any) => ({
+  id: m.slug, title: m.title, slug: m.slug, coverUrl: m.coverUrl,
+  status: m.type || 'ongoing', genres: [{ id: '', name: m.type || '', slug: '' }],
+})
+
+if (genreFilter) {
+  try {
+    if (!typeFilter || typeFilter === 'Semua') {
+      const [currentPage, nextPage] = await Promise.all([fetchGenreManga(genreFilter, page), fetchGenreManga(genreFilter, page + 1)])
+      results = currentPage.map(mapFn)
+      hasMore = nextPage.length > 0
+    } else {
+      const [currentPage, nextPage] = await Promise.all([fetchByGenreAndType(genreFilter, typeFilter, page), fetchByGenreAndType(genreFilter, typeFilter, page + 1)])
+      results = currentPage.map(mapFn)
+      hasMore = nextPage.length > 0
+    }
+  } catch (e: any) {
+    error = e.message || 'Gagal memuat genre'
+  }
+} else if (query) {
   try {
     const items = await fetchSearch(query)
-    results = items.map(m => ({
-      id: m.slug,
-      title: m.title,
-      slug: m.slug,
-      coverUrl: m.coverUrl,
-      status: m.type || 'ongoing',
-      genres: [{ id: '', name: m.type || '', slug: '' }],
-    }))
+    results = items
+      .filter(m => !typeFilter || typeFilter === 'Semua' || m.type === typeFilter)
+      .map(mapFn)
   } catch (e: any) {
     error = e.message || 'Search failed'
   }
+} else if (typeFilter && typeFilter !== 'Semua') {
+  try {
+    const [currentPage, nextPage] = await Promise.all([fetchByType(typeFilter, page), fetchByType(typeFilter, page + 1)])
+    results = currentPage.map(mapFn)
+    hasMore = nextPage.length > 0
+  } catch (e: any) {
+    error = e.message || 'Gagal memuat'
+  }
 }
+
+function buildUrl(params: Record<string, string>) {
+  const u = new URL(Astro.url.origin + Astro.url.pathname)
+  for (const [k, v] of Object.entries(params)) {
+    if (v) u.searchParams.set(k, v)
+  }
+  return u.pathname + u.search
+}
+
+function pageUrl(p: number) {
+  const u = new URL(Astro.url.origin + Astro.url.pathname)
+  if (query) u.searchParams.set('q', query)
+  if (typeFilter && typeFilter !== 'Semua') u.searchParams.set('type', typeFilter)
+  if (genreFilter) u.searchParams.set('genre', genreFilter)
+  u.searchParams.set('page', String(p))
+  return u.pathname + u.search
+}
+
+function removeFilter(remove: 'type' | 'genre') {
+  const u = new URL(Astro.url.origin + Astro.url.pathname)
+  if (query) u.searchParams.set('q', query)
+  if (remove !== 'type' && typeFilter && typeFilter !== 'Semua') u.searchParams.set('type', typeFilter)
+  if (remove !== 'genre' && genreFilter) u.searchParams.set('genre', genreFilter)
+  return u.pathname + u.search
+}
+
+const activeGenre = genreFilter ? GENRE_LIST.find(g => g.slug === genreFilter) : null
+const hasFilters = (typeFilter && typeFilter !== 'Semua') || genreFilter || query
 ---
 
 <EditorialLayout title={query ? `Cari: ${query} - YummyScans` : 'Cari Manga - YummyScans'} description="Cari manga, manhwa, dan manhua Sub Indo">
 
-  <section class="section-spacing bg-background">
-    <div class="max-w-[1280px] mx-auto px-6">
-      <div class="text-center mb-10">
-        <h1 class="text-display-lg mb-4">Cari Manga</h1>
-        <p class="text-body-lg text-muted-foreground max-w-xl mx-auto mb-8">
-          Temukan manga, manhwa, dan manhua favoritmu.
-        </p>
+  <section class="bg-background transition-theme">
+    <div class="max-w-[1280px] mx-auto px-6 pt-10 pb-16">
 
-        <form action="/search" method="get" class="max-w-lg mx-auto">
-          <div class="relative">
-            <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type="text"
-              name="q"
-              value={query}
-              placeholder="Judul manga..."
-              class="w-full h-12 pl-12 pr-4 rounded-[12px] border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-            />
-            <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 yummy-btn-primary h-8 px-4 text-sm">
-              Cari
-            </button>
-          </div>
-        </form>
+      {/* HEADER */}
+      <div class="text-center mb-8">
+        <h1 class="text-display-lg mb-3">Cari Manga</h1>
+        <p class="text-body text-muted-foreground max-w-md mx-auto">
+          Temukan manga, manhwa, dan manhua favoritmu dari ribuan koleksi.
+        </p>
       </div>
 
-      {query && error && (
-        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
-          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
-            <BookOpen class="w-8 h-8 text-muted-foreground" />
-          </div>
-          <p class="text-headline mb-2">Gagal mencari</p>
-          <p class="text-body-sm text-muted-foreground mb-4">{error}</p>
-          <a href="/search" class="yummy-btn-secondary inline-block">Coba Lagi</a>
+      {/* SEARCH BAR */}
+      <form action="/search" method="get" class="max-w-xl mx-auto mb-6">
+        {typeFilter && <input type="hidden" name="type" value={typeFilter} />}
+        {genreFilter && <input type="hidden" name="genre" value={genreFilter} />}
+        <div class="relative">
+          <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <input
+            type="text"
+            name="q"
+            value={query}
+            placeholder="Cari judul manga..."
+            class="w-full h-12 pl-12 pr-24 rounded-xl border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+          />
+          <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 bg-foreground text-background h-8 px-4 rounded-lg text-sm font-medium transition hover:opacity-90">
+            Cari
+          </button>
+        </div>
+      </form>
+
+      {/* TYPE FILTERS */}
+      <div class="flex items-center justify-center gap-2 mb-6">
+        {TYPES.map(t => {
+          const val = t === 'Semua' ? '' : t
+          const active = (!typeFilter && t === 'Semua') || (typeFilter === val && val !== '')
+          return (
+            <a
+              href={buildUrl({ q: query, type: val, genre: genreFilter })}
+              class={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                active ? 'bg-foreground text-background' : 'bg-secondary text-foreground/70 hover:bg-muted'
+              }`}
+            >
+              {t}
+            </a>
+          )
+        })}
+      </div>
+
+      {/* ACTIVE FILTERS BADGE */}
+      {((typeFilter && typeFilter !== 'Semua') || genreFilter || query) && (
+        <div class="flex items-center justify-center gap-2 mb-6 flex-wrap">
+          <span class="text-xs text-muted-foreground">Filter aktif:</span>
+          {query && (
+            <span class="inline-flex items-center gap-1 rounded-full bg-secondary text-foreground px-3 py-1 text-xs font-medium">
+              "{query}"
+            </span>
+          )}
+          {typeFilter && typeFilter !== 'Semua' && (
+            <a href={removeFilter('type')} class="inline-flex items-center gap-1 rounded-full bg-foreground text-background px-3 py-1 text-xs font-medium hover:opacity-80 transition">
+              {typeFilter} <X class="w-3 h-3" />
+            </a>
+          )}
+          {genreFilter && (
+            <a href={removeFilter('genre')} class="inline-flex items-center gap-1 rounded-full bg-accent text-accent-foreground px-3 py-1 text-xs font-medium hover:opacity-80 transition">
+              {activeGenre?.name || genreFilter} <X class="w-3 h-3" />
+            </a>
+          )}
+          <a href="/search" class="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2">Reset semua</a>
         </div>
       )}
 
-      {query && !error && results.length === 0 && (
-        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
-          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
-            <SearchIcon class="w-8 h-8 text-muted-foreground" />
+      {/* GENRE GRID — show when no results yet */}
+      {!hasFilters && !error && (
+        <div class="mb-8">
+          <div class="flex items-center gap-2 mb-4">
+            <SlidersHorizontal class="w-4 h-4 text-muted-foreground" />
+            <span class="text-sm font-medium text-foreground">Pilih Genre</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+            {GENRE_LIST.map(g => (
+              <a
+                href={buildUrl({ genre: g.slug })}
+                class="group flex items-center gap-2.5 rounded-xl bg-secondary p-3 transition hover:bg-muted hover:-translate-y-0.5"
+              >
+                <div class="w-8 h-8 rounded-lg bg-background flex items-center justify-center flex-shrink-0">
+                  <g.icon class="w-4 h-4 text-foreground/60" />
+                </div>
+                <span class="text-[13px] font-medium text-foreground/80 group-hover:text-foreground truncate">{g.name}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ERROR */}
+      {error && (
+        <div class="bg-secondary rounded-2xl p-10 text-center">
+          <div class="w-14 h-14 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+            <BookOpen class="w-7 h-7 text-muted-foreground" />
+          </div>
+          <p class="text-headline mb-2">Gagal memuat</p>
+          <p class="text-sm text-muted-foreground mb-4">{error}</p>
+          <a href="/search" class="inline-block bg-foreground text-background px-5 py-2 rounded-full text-sm font-medium hover:opacity-90 transition">Coba Lagi</a>
+        </div>
+      )}
+
+      {/* NO RESULTS */}
+      {!error && hasFilters && results.length === 0 && (
+        <div class="bg-secondary rounded-2xl p-10 text-center">
+          <div class="w-14 h-14 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+            <SearchIcon class="w-7 h-7 text-muted-foreground" />
           </div>
           <p class="text-headline mb-2">Tidak ditemukan</p>
-          <p class="text-body-sm text-muted-foreground mb-4">Tidak ada manga yang cocok dengan "{query}"</p>
-          <a href="/search" class="yummy-btn-secondary inline-block">Cari Lagi</a>
+          <p class="text-sm text-muted-foreground mb-4">
+            {query && `Tidak ada manga yang cocok dengan "${query}"`}
+            {activeGenre && !query && `Tidak ada manga di genre "${activeGenre.name}"`}
+            {typeFilter && typeFilter !== 'Semua' && ` (${typeFilter})`}
+          </p>
+          <a href="/search" class="inline-block bg-foreground text-background px-5 py-2 rounded-full text-sm font-medium hover:opacity-90 transition">Cari Lagi</a>
         </div>
       )}
 
-      {results.length > 0 && (
+      {/* RESULTS */}
+      {!error && results.length > 0 && (
         <>
-          <p class="text-sm text-muted-foreground mb-6">
-            Ditemukan {results.length} manga untuk "{query}"
-          </p>
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6">
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-xs text-muted-foreground">
+              {results.length} manga ditemukan
+              {query && <> untuk "<span class="text-foreground font-medium">{query}</span>"</>}
+              {typeFilter && typeFilter !== 'Semua' && <> &middot; {typeFilter}</>}
+              {activeGenre && <> &middot; {activeGenre.name}</>}
+            </p>
+            <span class="text-xs text-muted-foreground">Halaman {page}</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
             {results.map((manga, i) => (
               <MangaCard
                 client:load
@@ -93,18 +273,26 @@ if (query) {
               />
             ))}
           </div>
+
+          {/* PAGINATION */}
+          <div class="flex items-center justify-center gap-2 mt-10">
+            {page > 1 && (
+              <a href={pageUrl(page - 1)} class="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-foreground transition hover:bg-muted">
+                &lsaquo;
+              </a>
+            )}
+            <span class="h-9 min-w-9 flex items-center justify-center rounded-lg bg-foreground text-background px-3 text-sm font-semibold">
+              {page}
+            </span>
+            {hasMore && (
+              <a href={pageUrl(page + 1)} class="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-foreground transition hover:bg-muted">
+                &rsaquo;
+              </a>
+            )}
+          </div>
         </>
       )}
 
-      {!query && !error && (
-        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
-          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
-            <SearchIcon class="w-8 h-8 text-muted-foreground" />
-          </div>
-          <p class="text-headline mb-2">Mulai mencari</p>
-          <p class="text-body-sm text-muted-foreground">Ketik judul manga di atas untuk mulai mencari.</p>
-        </div>
-      )}
     </div>
   </section>
 

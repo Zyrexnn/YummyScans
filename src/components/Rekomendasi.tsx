@@ -39,7 +39,7 @@ export default function Rekomendasi({ manga }: { manga: LatestManga[] }) {
               className={
                 'rounded-full px-5 py-2 text-sm font-semibold transition ' +
                 (tab === t
-                  ? 'bg-[#6d28d9] text-white'
+                  ? 'bg-foreground text-background'
                   : 'bg-secondary text-foreground/70 hover:bg-muted')
               }
             >

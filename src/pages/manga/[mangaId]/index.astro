@@ -2,7 +2,7 @@
 import EditorialLayout from '../../../layouts/EditorialLayout.astro'
 import { Badge } from '../../../components/ui/badge'
 import { ArrowLeft, BookOpen, User, Calendar, ArrowRight, Clock } from 'lucide-react'
-import { fetchDetail } from '../../../lib/komiku'
+import { fetchDetail, fetchGenreManga } from '../../../lib/komiku'
 
 const { mangaId } = Astro.params
 
@@ -15,6 +15,7 @@ let authorName = ''
 let genres: string[] = []
 let error: string | null = null
 let mangaType = ''
+let recommendations: { title: string; slug: string; coverUrl: string; type: string; chapter: string }[] = []
 
 try {
   const detail = await fetchDetail(mangaId!)
@@ -34,6 +35,34 @@ try {
       title: ch.title,
     }
   }))
+
+  if (genres.length > 0) {
+    try {
+      const genreSlugs = genres.slice(0, 3).map(g => g.toLowerCase().replace(/\s+/g, '-'))
+      const fetches = await Promise.allSettled(
+        genreSlugs.map(slug => fetchGenreManga(slug, 1))
+      )
+
+      const seen = new Map<string, { title: string; slug: string; coverUrl: string; type: string; chapter: string; hits: number }>()
+      for (const result of fetches) {
+        if (result.status !== 'fulfilled') continue
+        for (const m of result.value) {
+          if (m.slug === mangaId) continue
+          const existing = seen.get(m.slug)
+          if (existing) {
+            existing.hits++
+          } else {
+            seen.set(m.slug, { title: m.title, slug: m.slug, coverUrl: m.coverUrl, type: m.type, chapter: m.chapter, hits: 1 })
+          }
+        }
+      }
+
+      recommendations = [...seen.values()]
+        .sort((a, b) => b.hits - a.hits)
+        .slice(0, 12)
+        .map(({ hits, ...rest }) => rest)
+    } catch {}
+  }
 } catch (e: any) {
   error = e.message || 'Failed to load manga'
 }
@@ -56,17 +85,17 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
         </div>
         <h1 class="text-headline mb-3">Manga Tidak Ditemukan</h1>
         <p class="text-body-sm text-muted-foreground mb-8">{error}</p>
-        <a href="/" class="yummy-btn-secondary inline-flex items-center gap-2">
-          <ArrowLeft class="w-4 h-4" /> Kembali ke Beranda
-        </a>
+        <button onclick="history.back()" class="yummy-btn-secondary inline-flex items-center gap-2">
+          <ArrowLeft class="w-4 h-4" /> Kembali
+        </button>
       </div>
     </section>
   ) : (
     <>
       <div class="max-w-[1280px] mx-auto px-6 py-4">
-        <a href="/" class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors no-underline">
+        <button onclick="history.back()" class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors bg-transparent border-0 cursor-pointer p-0">
           <ArrowLeft class="w-4 h-4" /> Kembali
-        </a>
+        </button>
       </div>
 
       <section class="pb-8 bg-background">
@@ -165,45 +194,112 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
         </div>
       </section>
 
-      {chapters.length > 0 && (
-        <section class="pb-16 bg-background">
-          <div class="max-w-[1280px] mx-auto px-6">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-headline">Daftar Chapter</h2>
-              <span class="text-sm text-muted-foreground">{chapters.length} chapter</span>
+      {chapters.length > 0 && (() => {
+        const INITIAL_SHOW = 30
+        const chapterData = chapters.map((ch: any) => {
+          const chSlug = ch.slug || ch.id
+          const chNum = ch.attributes?.chapter || chSlug?.match(/chapter-([\d.]+)/)?.[1] || '?'
+          return { slug: chSlug, num: chNum }
+        })
+        return (
+          <section class="pb-16 bg-background">
+            <div class="max-w-[1280px] mx-auto px-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-headline">Daftar Chapter</h2>
+                <span class="text-xs text-muted-foreground bg-secondary rounded-full px-3 py-1">{chapters.length}</span>
+              </div>
+
+              <div class="rounded-xl border border-border p-3 md:p-4">
+                <div id="chapter-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-1.5">
+                  {chapterData.map((ch, i) => (
+                    <a
+                      href={`/manga/${mangaId}/${ch.slug}`}
+                      class:list={[
+                        "chapter-item flex items-center justify-center rounded-lg py-2 text-xs font-medium transition no-underline text-foreground hover:bg-foreground hover:text-background",
+                        i >= INITIAL_SHOW ? "hidden" : "bg-secondary"
+                      ]}
+                      data-index={i}
+                    >
+                      {ch.num}
+                    </a>
+                  ))}
+                </div>
+
+                {chapters.length > INITIAL_SHOW && (
+                  <div class="mt-3 text-center">
+                    <button
+                      id="chapter-toggle"
+                      onclick="
+                        const grid = document.getElementById('chapter-grid');
+                        const items = grid.querySelectorAll('.chapter-item');
+                        const btn = this;
+                        const expanded = btn.dataset.expanded === '1';
+                        items.forEach((el, i) => {
+                          if (i >= 30) el.classList.toggle('hidden', expanded);
+                        });
+                        btn.dataset.expanded = expanded ? '0' : '1';
+                        btn.textContent = expanded ? 'Lihat Semua Chapter' : 'Sembunyikan';
+                        if (!expanded) grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                      "
+                      data-expanded="0"
+                      class="w-full py-2.5 rounded-lg bg-secondary text-sm font-medium text-foreground hover:bg-muted transition"
+                    >
+                      Lihat Semua Chapter
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-            <div class="border border-border rounded-[12px] overflow-hidden">
-              {chapters.map((ch: any, i: number) => {
-                const chSlug = ch.slug || ch.id
-                const chNum = ch.attributes?.chapter || chSlug?.match(/chapter-([\d.]+)/)?.[1] || '?'
-                const chTitle = ch.attributes?.title || ''
-                return (
-                  <a
-                    href={`/manga/${mangaId}/${chSlug}`}
-                    class={`flex items-center justify-between px-5 py-4 hover:bg-secondary transition-colors no-underline text-foreground border-b border-border last:border-b-0 ${i % 2 === 0 ? 'bg-background' : 'bg-secondary/30'}`}
-                  >
-                    <div class="flex items-center gap-3">
-                      <span class="text-sm font-semibold min-w-[60px]">Ch. {chNum}</span>
-                      {chTitle && chTitle !== `Chapter ${chNum}` && (
-                        <span class="text-sm text-muted-foreground hidden sm:inline truncate max-w-[300px]">- {chTitle}</span>
-                      )}
-                    </div>
-                    <span class="text-xs text-muted-foreground flex items-center gap-1">
-                      Baca
-                      <ArrowRight class="w-3 h-3" />
-                    </span>
-                  </a>
-                )
-              })}
-            </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )
+      })()}
 
       {chapters.length === 0 && !error && (
         <section class="pb-16 bg-background">
           <div class="max-w-[1280px] mx-auto px-6 text-center">
             <p class="text-muted-foreground">Belum ada chapter.</p>
+          </div>
+        </section>
+      )}
+
+      {recommendations.length > 0 && (
+        <section class="pb-16 bg-background">
+          <div class="max-w-[1280px] mx-auto px-6">
+            <div class="flex items-center justify-between mb-5">
+              <h2 class="text-headline">Kamu Mungkin Suka</h2>
+              <a href={`/genre/${genres[0]?.toLowerCase().replace(/\s+/g, '-') || ''}`} class="text-xs text-muted-foreground hover:text-foreground transition">
+                {genres[0]} &rarr;
+              </a>
+            </div>
+            <p class="text-xs text-muted-foreground mb-4">Berdasarkan genre: {genres.join(', ')}</p>
+            <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+              {recommendations.map(m => (
+                <a
+                  href={`/manga/${m.slug}`}
+                  class="group block"
+                >
+                  <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-secondary">
+                    <img
+                      src={m.coverUrl}
+                      alt={m.title}
+                      loading="lazy"
+                      class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        const t = e.target as HTMLImageElement
+                        t.style.display = 'none'
+                      }}
+                    />
+                    <span class="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-white text-[9px] leading-none shadow">
+                      {m.type === 'Manhwa' ? '🇰🇷' : m.type === 'Manhua' ? '🇨🇳' : '🇯🇵'}
+                    </span>
+                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-2 pt-6">
+                      <h3 class="line-clamp-2 text-[11px] font-bold leading-tight text-white">{m.title}</h3>
+                      {m.chapter && <p class="mt-0.5 truncate text-[9px] text-white/50">{m.chapter}</p>}
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
         </section>
       )}
