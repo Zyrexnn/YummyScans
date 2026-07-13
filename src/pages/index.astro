@@ -7,17 +7,25 @@ import StatsSection from '../components/StatsSection'
 import FeaturesSection from '../components/FeaturesSection'
 import GenreShowcase from '../components/GenreShowcase'
 import FAQSection from '../components/FAQSection'
-import { fetchPopularManga } from '../lib/mangadex'
+import { fetchLatest } from '../lib/komiku'
 import { ArrowRight, Sparkles, TrendingUp, BookOpen, AlertCircle } from 'lucide-react'
 
 let mangaList: any[] = []
 let fetchError: string | null = null
 
 try {
-  mangaList = await fetchPopularManga(5)
+  const latest = await fetchLatest(1)
+  mangaList = latest.slice(0, 10).map((m) => ({
+    id: m.slug,
+    title: m.title,
+    slug: m.slug,
+    coverUrl: m.coverUrl,
+    status: m.type || 'ongoing',
+    genres: [{ id: '', name: m.type, slug: '' }],
+  }))
 } catch (error: any) {
-  fetchError = error.message || 'Failed to fetch manga'
-  console.error('MangaDex fetch error:', fetchError)
+  fetchError = error.message || 'Gagal memuat manga'
+  console.error('[Home] Failed to load manga:', error.message)
 }
 ---
 
@@ -67,10 +75,13 @@ try {
         <div>
           <div class="text-eyebrow text-muted-foreground mb-3 flex items-center gap-2">
             <TrendingUp class="w-4 h-4" />
-            Populer
+            Terbaru
           </div>
-          <h2 class="text-display-lg">Manga Populer</h2>
+          <h2 class="text-display-lg">Manga Terbaru</h2>
         </div>
+        <a href="/latest" class="yummy-btn-secondary hidden sm:inline-flex items-center gap-2">
+          Lihat Semua <ArrowRight class="w-4 h-4" />
+        </a>
       </div>
 
       {mangaList.length > 0 ? (
