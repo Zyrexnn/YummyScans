@@ -1,5 +1,12 @@
 import { supabase } from '../db/supabase'
 
+const FORMATS = ['manga', 'manhwa', 'manhua']
+
+function normalizeFormat(value) {
+  const f = String(value || '').trim().toLowerCase()
+  return FORMATS.includes(f) ? f : 'manga'
+}
+
 /**
  * Get manga list with pagination and filters
  */
@@ -63,7 +70,8 @@ export async function getMangaById(id) {
  * Create new manga
  */
 export async function createManga(mangaData) {
-  const { genres, ...manga } = mangaData
+  const { genres, type, ...manga } = mangaData
+  if (type && !manga.format) manga.format = normalizeFormat(type)
 
   const { data, error } = await supabase
     .from('manga')
@@ -94,7 +102,8 @@ export async function createManga(mangaData) {
  * Update manga
  */
 export async function updateManga(id, mangaData) {
-  const { genres, ...manga } = mangaData
+  const { genres, type, ...manga } = mangaData
+  if (type && !manga.format) manga.format = normalizeFormat(type)
 
   const { data, error } = await supabase
     .from('manga')
