@@ -1,35 +1,16 @@
 ---
 import EditorialLayout from '../layouts/EditorialLayout.astro'
-import MangaCard from '../components/MangaCard'
-import MarqueeStrip from '../components/MarqueeStrip'
 import Hero from '../components/Hero'
-import StatsSection from '../components/StatsSection'
-import FeaturesSection from '../components/FeaturesSection'
-import GenreShowcase from '../components/GenreShowcase'
-import FAQSection from '../components/FAQSection'
 import Rekomendasi from '../components/Rekomendasi'
 import UpdateSection from '../components/UpdateSection'
 import { fetchLatest } from '../lib/komiku'
-import { ArrowRight, BookOpen, AlertCircle } from 'lucide-react'
 
-let mangaList: any[] = []
 let latestFeed: any[] = []
-let fetchError: string | null = null
 
 try {
   const pages = await Promise.all([fetchLatest(1), fetchLatest(2), fetchLatest(3), fetchLatest(4)])
-  const merged = pages.flat()
-  latestFeed = merged
-  mangaList = merged.slice(0, 10).map((m) => ({
-    id: m.slug,
-    title: m.title,
-    slug: m.slug,
-    coverUrl: m.coverUrl,
-    status: m.type || 'ongoing',
-    genres: [{ id: '', name: m.type, slug: '' }],
-  }))
+  latestFeed = pages.flat()
 } catch (error: any) {
-  fetchError = error.message || 'Gagal memuat manga'
   console.error('[Home] Failed to load manga:', error.message)
 }
 ---
@@ -44,82 +25,5 @@ try {
 
   {/* UPDATE */}
   <UpdateSection client:load manga={latestFeed} />
-
-  {/* MARQUEE */}
-  <MarqueeStrip client:load />
-
-  {/* STATS */}
-  <StatsSection client:load />
-
-  {/* FEATURES */}
-  <FeaturesSection client:visible />
-
-  {/* POPULAR MANGA */}
-  <section class="section-spacing bg-background transition-theme">
-    <div class="max-w-[1280px] mx-auto px-6">
-      <div class="flex items-end justify-between mb-10">
-        <div>
-          <h2 class="text-display-lg">Manga Terbaru</h2>
-        </div>
-        <a href="/latest" class="yummy-btn-secondary hidden sm:inline-flex items-center gap-2">
-          Lihat Semua <ArrowRight class="w-4 h-4" />
-        </a>
-      </div>
-
-      {mangaList.length > 0 ? (
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6">
-          {mangaList.map((manga, i) => (
-            <MangaCard
-              client:load
-              title={manga.title}
-              coverUrl={manga.coverUrl}
-              slug={manga.slug}
-              genres={manga.genres}
-              status={manga.status}
-              index={i}
-            />
-          ))}
-        </div>
-      ) : (
-        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
-          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
-            {fetchError ? (
-              <AlertCircle class="w-8 h-8 text-destructive" />
-            ) : (
-              <BookOpen class="w-8 h-8 text-muted-foreground" />
-            )}
-          </div>
-          <p class="text-headline mb-2">
-            {fetchError ? 'Gagal memuat manga' : 'Tidak ada manga'}
-          </p>
-          <p class="text-body-sm text-muted-foreground mb-4">
-            {fetchError || 'Coba refresh halaman.'}
-          </p>
-          <a href="/" class="yummy-btn-secondary inline-block">
-            Coba Lagi
-          </a>
-        </div>
-      )}
-    </div>
-  </section>
-
-  {/* GENRE SHOWCASE */}
-  <GenreShowcase client:visible />
-
-  {/* FAQ */}
-  <FAQSection client:visible />
-
-  {/* CTA */}
-  <section class="section-spacing bg-background transition-theme">
-    <div class="max-w-2xl mx-auto px-6 text-center">
-      <h2 class="text-display-lg mb-6">Siap Membaca?</h2>
-      <p class="text-body-lg text-muted-foreground mb-10">
-        Jelajahi ribuan manga dan manhwa dengan terjemahan bahasa Indonesia yang berkualitas.
-      </p>
-      <a href="/search" class="yummy-btn-primary inline-flex items-center gap-2">
-        Mulai Baca <ArrowRight class="w-4 h-4" />
-      </a>
-    </div>
-  </section>
 
 </EditorialLayout>
