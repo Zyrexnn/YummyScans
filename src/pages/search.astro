@@ -1,3 +1,111 @@
 ---
+import EditorialLayout from '../layouts/EditorialLayout.astro'
+import MangaCard from '../components/MangaCard'
+import { fetchSearch } from '../lib/komiku'
+import { Search as SearchIcon, BookOpen } from 'lucide-react'
+
+const query = Astro.url.searchParams.get('q') || ''
+
+let results: any[] = []
+let error: string | null = null
+
+if (query) {
+  try {
+    const items = await fetchSearch(query)
+    results = items.map(m => ({
+      id: m.slug,
+      title: m.title,
+      slug: m.slug,
+      coverUrl: m.coverUrl,
+      status: m.type || 'ongoing',
+      genres: [{ id: '', name: m.type || '', slug: '' }],
+    }))
+  } catch (e: any) {
+    error = e.message || 'Search failed'
+  }
+}
 ---
-<html><body><h1>Search</h1></body></html>
+
+<EditorialLayout title={query ? `Cari: ${query} - YummyScans` : 'Cari Manga - YummyScans'} description="Cari manga, manhwa, dan manhua Sub Indo">
+
+  <section class="section-spacing bg-background">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <div class="text-center mb-10">
+        <h1 class="text-display-lg mb-4">Cari Manga</h1>
+        <p class="text-body-lg text-muted-foreground max-w-xl mx-auto mb-8">
+          Temukan manga, manhwa, dan manhua favoritmu.
+        </p>
+
+        <form action="/search" method="get" class="max-w-lg mx-auto">
+          <div class="relative">
+            <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="text"
+              name="q"
+              value={query}
+              placeholder="Judul manga..."
+              class="w-full h-12 pl-12 pr-4 rounded-[12px] border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
+            <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 yummy-btn-primary h-8 px-4 text-sm">
+              Cari
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {query && error && (
+        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
+          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
+            <BookOpen class="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p class="text-headline mb-2">Gagal mencari</p>
+          <p class="text-body-sm text-muted-foreground mb-4">{error}</p>
+          <a href="/search" class="yummy-btn-secondary inline-block">Coba Lagi</a>
+        </div>
+      )}
+
+      {query && !error && results.length === 0 && (
+        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
+          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
+            <SearchIcon class="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p class="text-headline mb-2">Tidak ditemukan</p>
+          <p class="text-body-sm text-muted-foreground mb-4">Tidak ada manga yang cocok dengan "{query}"</p>
+          <a href="/search" class="yummy-btn-secondary inline-block">Cari Lagi</a>
+        </div>
+      )}
+
+      {results.length > 0 && (
+        <>
+          <p class="text-sm text-muted-foreground mb-6">
+            Ditemukan {results.length} manga untuk "{query}"
+          </p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6">
+            {results.map((manga, i) => (
+              <MangaCard
+                client:load
+                title={manga.title}
+                coverUrl={manga.coverUrl}
+                slug={manga.slug}
+                genres={manga.genres}
+                status={manga.status}
+                index={i}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {!query && !error && (
+        <div class="bg-secondary rounded-[24px] p-12 md:p-16 text-center">
+          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-5">
+            <SearchIcon class="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p class="text-headline mb-2">Mulai mencari</p>
+          <p class="text-body-sm text-muted-foreground">Ketik judul manga di atas untuk mulai mencari.</p>
+        </div>
+      )}
+    </div>
+  </section>
+
+</EditorialLayout>
