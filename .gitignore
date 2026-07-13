@@ -17,6 +17,10 @@ node_modules/
 prd.md
 DESIGN-figma.md
 
+# opencode
+.opencode/
+opencode.json
+
 # os
 .DS_Store
 Thumbs.db
