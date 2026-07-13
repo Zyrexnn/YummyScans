@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion'
-import { HelpCircle } from 'lucide-react'
 
 const faqs = [
   {
@@ -38,10 +37,6 @@ export default function FAQSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <div className="inline-flex items-center gap-2 text-eyebrow text-muted-foreground mb-3">
-            <HelpCircle className="w-4 h-4" />
-            FAQ
-          </div>
           <h2 className="text-display-lg mb-4">Pertanyaan Umum</h2>
         </motion.div>
 

@@ -11,9 +11,14 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const sentinel = document.getElementById('top-sentinel')
+    if (!sentinel) return
+    const obs = new IntersectionObserver(
+      ([entry]) => setScrolled(!entry.isIntersecting),
+      { threshold: 0 }
+    )
+    obs.observe(sentinel)
+    return () => obs.disconnect()
   }, [])
 
   return (
