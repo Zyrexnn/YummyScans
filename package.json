@@ -23,6 +23,7 @@
     "@radix-ui/react-tooltip": "^1.2.12",
     "@supabase/supabase-js": "^2.49.0",
     "astro": "^5.7.0",
+    "cheerio": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.42.2",
