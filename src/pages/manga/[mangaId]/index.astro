@@ -1,67 +1,61 @@
 ---
 import EditorialLayout from '../../../layouts/EditorialLayout.astro'
 import { Badge } from '../../../components/ui/badge'
-import { ArrowLeft, BookOpen, User, Calendar } from 'lucide-react'
-import { fetchMangaDetail, fetchMangaChapters } from '../../../lib/mangadex'
+import { ArrowLeft, BookOpen, User, Calendar, ArrowRight, Clock } from 'lucide-react'
+import { fetchDetail } from '../../../lib/komiku'
 
 const { mangaId } = Astro.params
 
-let manga: any = null
 let chapters: any[] = []
 let coverUrl: string | null = null
 let title = 'Unknown'
 let description = ''
 let status = 'unknown'
-let year: number | null = null
 let authorName = ''
 let genres: string[] = []
 let error: string | null = null
+let mangaType = ''
 
 try {
-  // Fetch manga detail
-  manga = await fetchMangaDetail(mangaId!)
-
-  // Extract data
-  const cover = manga?.relationships?.find((r: any) => r.type === 'cover_art')
-  const fileName = cover?.attributes?.fileName
-  coverUrl = fileName ? `/api/cover?id=${mangaId}` : null
-
-  title = manga?.attributes?.title?.en 
-    || manga?.attributes?.title?.ja 
-    || Object.values(manga?.attributes?.title || {})[0] 
-    || 'Unknown'
-  
-  description = manga?.attributes?.description?.en 
-    || manga?.attributes?.description?.id 
-    || ''
-  
-  status = manga?.attributes?.status || 'unknown'
-  year = manga?.attributes?.year || null
-
-  const author = manga?.relationships?.find((r: any) => r.type === 'author')
-  authorName = author?.attributes?.name || ''
-
-  genres = (manga?.attributes?.tags || [])
-    .filter((t: any) => t.attributes?.group === 'genre')
-    .map((t: any) => t.attributes?.name?.en || 'Unknown')
-
-  // Fetch chapters
-  chapters = await fetchMangaChapters(mangaId!)
+  const detail = await fetchDetail(mangaId!)
+  title = detail.title
+  coverUrl = detail.coverUrl || null
+  description = detail.synopsis
+  status = detail.status
+  genres = detail.genres
+  authorName = detail.author
+  mangaType = detail.type
+  chapters = detail.chapters.map(ch => ({
+    id: ch.slug,
+    title: ch.title,
+    slug: ch.slug,
+    attributes: {
+      chapter: ch.slug.match(/chapter-([\d.]+)/)?.[1] || '?',
+      title: ch.title,
+    }
+  }))
 } catch (e: any) {
   error = e.message || 'Failed to load manga'
 }
+
+const firstChapter = chapters.find(ch => {
+  const num = parseFloat(ch.attributes?.chapter || ch.slug?.match(/chapter-([\d.]+)/)?.[1] || '0')
+  return num > 0
+}) || chapters[0]
+
+const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
 ---
 
 <EditorialLayout title={`${title} - YummyScans`}>
 
-  {error || !manga ? (
+  {error ? (
     <section class="section-spacing bg-background">
       <div class="max-w-[1280px] mx-auto px-6 text-center">
         <div class="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
           <BookOpen class="w-10 h-10 text-muted-foreground" />
         </div>
         <h1 class="text-headline mb-3">Manga Tidak Ditemukan</h1>
-        <p class="text-body-sm text-muted-foreground mb-8">{error || 'Manga yang kamu cari tidak tersedia.'}</p>
+        <p class="text-body-sm text-muted-foreground mb-8">{error}</p>
         <a href="/" class="yummy-btn-secondary inline-flex items-center gap-2">
           <ArrowLeft class="w-4 h-4" /> Kembali ke Beranda
         </a>
@@ -69,19 +63,16 @@ try {
     </section>
   ) : (
     <>
-      {/* Back Button */}
       <div class="max-w-[1280px] mx-auto px-6 py-4">
         <a href="/" class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors no-underline">
           <ArrowLeft class="w-4 h-4" /> Kembali
         </a>
       </div>
 
-      {/* Manga Detail */}
-      <section class="pb-16 bg-background">
+      <section class="pb-8 bg-background">
         <div class="max-w-[1280px] mx-auto px-6">
           <div class="flex flex-col md:flex-row gap-8 md:gap-12">
 
-            {/* Cover Image */}
             <div class="w-full md:w-[320px] flex-shrink-0">
               <div class="aspect-[3/4] rounded-[16px] overflow-hidden bg-secondary">
                 {coverUrl ? (
@@ -94,17 +85,20 @@ try {
               </div>
             </div>
 
-            {/* Info */}
             <div class="flex-1">
-              {/* Status Badge */}
-              <Badge variant={status === 'ongoing' ? 'default' : 'secondary'} class="mb-4">
-                {status === 'ongoing' ? 'Ongoing' : status === 'completed' ? 'Tamat' : status === 'hiatus' ? 'Hiatus' : status}
-              </Badge>
+              <div class="flex flex-wrap items-center gap-2 mb-4">
+                <Badge variant={status === 'ongoing' ? 'default' : 'secondary'}>
+                  {status === 'ongoing' ? 'Ongoing' : status === 'completed' ? 'Tamat' : status === 'hiatus' ? 'Hiatus' : status}
+                </Badge>
+                {mangaType && (
+                  <Badge variant="outline" class="text-xs font-mono uppercase tracking-wider">
+                    {mangaType}
+                  </Badge>
+                )}
+              </div>
 
-              {/* Title */}
               <h1 class="text-display-lg mb-4">{title}</h1>
 
-              {/* Meta */}
               <div class="flex flex-wrap gap-4 mb-6 text-sm text-muted-foreground">
                 {authorName && (
                   <div class="flex items-center gap-1.5">
@@ -112,30 +106,31 @@ try {
                     <span>{authorName}</span>
                   </div>
                 )}
-                {year && (
-                  <div class="flex items-center gap-1.5">
-                    <Calendar class="w-4 h-4" />
-                    <span>{year}</span>
-                  </div>
-                )}
                 <div class="flex items-center gap-1.5">
                   <BookOpen class="w-4 h-4" />
                   <span>{chapters.length} Chapter</span>
                 </div>
+                {latestChapter && (
+                  <div class="flex items-center gap-1.5">
+                    <Clock class="w-4 h-4" />
+                    <span>Ch. {latestChapter.attributes?.chapter || '?'}</span>
+                  </div>
+                )}
               </div>
 
-              {/* Genres */}
               {genres.length > 0 && (
                 <div class="flex flex-wrap gap-2 mb-6">
                   {genres.map((genre: string) => (
-                    <span class="text-xs font-mono uppercase tracking-wider px-3 py-1.5 rounded-full bg-secondary text-foreground">
+                    <a
+                      href={`/genre/${genre.toLowerCase().replace(/\s+/g, '-')}`}
+                      class="text-xs font-mono uppercase tracking-wider px-3 py-1.5 rounded-full bg-secondary text-foreground hover:bg-primary hover:text-primary-foreground transition-colors no-underline"
+                    >
                       {genre}
-                    </span>
+                    </a>
                   ))}
                 </div>
               )}
 
-              {/* Synopsis */}
               {description && (
                 <div class="mb-8">
                   <h3 class="text-headline mb-3">Sinopsis</h3>
@@ -145,50 +140,70 @@ try {
                 </div>
               )}
 
-              {/* Read Button */}
-              {chapters.length > 0 && (
-                <a href={`/manga/${mangaId}/${chapters[0].id}`} class="yummy-btn-primary inline-flex items-center gap-2">
-                  Baca Chapter 1
-                  <ArrowLeft class="w-4 h-4 rotate-180" />
-                </a>
-              )}
+              <div class="flex flex-wrap gap-3">
+                {firstChapter && (
+                  <a
+                    href={`/manga/${mangaId}/${firstChapter.slug || firstChapter.id}`}
+                    class="yummy-btn-primary inline-flex items-center gap-2"
+                  >
+                    Baca Chapter 1
+                    <ArrowRight class="w-4 h-4" />
+                  </a>
+                )}
+                {latestChapter && latestChapter !== firstChapter && (
+                  <a
+                    href={`/manga/${mangaId}/${latestChapter.slug || latestChapter.id}`}
+                    class="yummy-btn-secondary inline-flex items-center gap-2"
+                  >
+                    Chapter Terbaru
+                    <ArrowRight class="w-4 h-4" />
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Chapter List */}
       {chapters.length > 0 && (
         <section class="pb-16 bg-background">
           <div class="max-w-[1280px] mx-auto px-6">
-            <h2 class="text-headline mb-6">Daftar Chapter</h2>
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-headline">Daftar Chapter</h2>
+              <span class="text-sm text-muted-foreground">{chapters.length} chapter</span>
+            </div>
             <div class="border border-border rounded-[12px] overflow-hidden">
-              {chapters.map((ch: any) => (
-                <a
-                  href={`/manga/${mangaId}/${ch.id}`}
-                  class="flex items-center justify-between px-5 py-4 hover:bg-secondary transition-colors no-underline text-foreground border-b border-border last:border-b-0"
-                >
-                  <div class="flex items-center gap-3">
-                    <span class="text-sm font-semibold">Chapter {ch.attributes?.chapter || '?'}</span>
-                    {ch.attributes?.title && (
-                      <span class="text-sm text-muted-foreground">- {ch.attributes.title}</span>
-                    )}
-                  </div>
-                  <span class="text-xs text-muted-foreground">
-                    {ch.attributes?.pages || '?'} halaman
-                  </span>
-                </a>
-              ))}
+              {chapters.map((ch: any, i: number) => {
+                const chSlug = ch.slug || ch.id
+                const chNum = ch.attributes?.chapter || chSlug?.match(/chapter-([\d.]+)/)?.[1] || '?'
+                const chTitle = ch.attributes?.title || ''
+                return (
+                  <a
+                    href={`/manga/${mangaId}/${chSlug}`}
+                    class={`flex items-center justify-between px-5 py-4 hover:bg-secondary transition-colors no-underline text-foreground border-b border-border last:border-b-0 ${i % 2 === 0 ? 'bg-background' : 'bg-secondary/30'}`}
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="text-sm font-semibold min-w-[60px]">Ch. {chNum}</span>
+                      {chTitle && chTitle !== `Chapter ${chNum}` && (
+                        <span class="text-sm text-muted-foreground hidden sm:inline truncate max-w-[300px]">- {chTitle}</span>
+                      )}
+                    </div>
+                    <span class="text-xs text-muted-foreground flex items-center gap-1">
+                      Baca
+                      <ArrowRight class="w-3 h-3" />
+                    </span>
+                  </a>
+                )
+              })}
             </div>
           </div>
         </section>
       )}
 
-      {/* No Chapters */}
       {chapters.length === 0 && !error && (
         <section class="pb-16 bg-background">
           <div class="max-w-[1280px] mx-auto px-6 text-center">
-            <p class="text-muted-foreground">Belum ada chapter dalam Bahasa Indonesia.</p>
+            <p class="text-muted-foreground">Belum ada chapter.</p>
           </div>
         </section>
       )}
