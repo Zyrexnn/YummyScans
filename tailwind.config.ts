@@ -4,85 +4,97 @@ export default {
   darkMode: ['class'],
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   theme: {
-    extend: {
-      colors: {
-        /* shadcn base */
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
-        primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
-        },
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-        },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
-        },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
-        popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
-        },
-        card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
-        },
-        /* Figma Pastel Blocks */
-        'block-lime': 'hsl(var(--block-lime))',
-        'block-lilac': 'hsl(var(--block-lilac))',
-        'block-cream': 'hsl(var(--block-cream))',
-        'block-pink': 'hsl(var(--block-pink))',
-        'block-mint': 'hsl(var(--block-mint))',
-        'block-coral': 'hsl(var(--block-coral))',
-        'block-navy': 'hsl(var(--block-navy))',
-        /* Figma specific */
-        'surface-soft': '#f7f7f5',
-        'hairline': '#e6e6e6',
-        'hairline-soft': '#f1f1f1',
-        'inverse-canvas': '#000000',
-        'inverse-ink': '#ffffff',
-      },
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-        pill: '50px',
-      },
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
-      },
-      spacing: {
-        section: '96px',
-      },
-      keyframes: {
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
-        },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
-        },
-      },
-      animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-      },
-    },
+  	extend: {
+  		colors: {
+  			border: 'hsl(var(--border))',
+  			input: 'hsl(var(--input))',
+  			ring: 'hsl(var(--ring))',
+  			background: 'hsl(var(--background))',
+  			foreground: 'hsl(var(--foreground))',
+  			primary: {
+  				DEFAULT: 'hsl(var(--primary))',
+  				foreground: 'hsl(var(--primary-foreground))'
+  			},
+  			secondary: {
+  				DEFAULT: 'hsl(var(--secondary))',
+  				foreground: 'hsl(var(--secondary-foreground))'
+  			},
+  			destructive: {
+  				DEFAULT: 'hsl(var(--destructive))',
+  				foreground: 'hsl(var(--destructive-foreground))'
+  			},
+  			muted: {
+  				DEFAULT: 'hsl(var(--muted))',
+  				foreground: 'hsl(var(--muted-foreground))'
+  			},
+  			accent: {
+  				DEFAULT: 'hsl(var(--accent))',
+  				foreground: 'hsl(var(--accent-foreground))'
+  			},
+  			popover: {
+  				DEFAULT: 'hsl(var(--popover))',
+  				foreground: 'hsl(var(--popover-foreground))'
+  			},
+  			card: {
+  				DEFAULT: 'hsl(var(--card))',
+  				foreground: 'hsl(var(--card-foreground))'
+  			},
+  			'block-lime': 'hsl(var(--block-lime))',
+  			'block-lilac': 'hsl(var(--block-lilac))',
+  			'block-cream': 'hsl(var(--block-cream))',
+  			'block-pink': 'hsl(var(--block-pink))',
+  			'block-mint': 'hsl(var(--block-mint))',
+  			'block-coral': 'hsl(var(--block-coral))',
+  			'block-navy': 'hsl(var(--block-navy))',
+  			'surface-soft': '#f7f7f5',
+  			hairline: '#e6e6e6',
+  			'hairline-soft': '#f1f1f1',
+  			'inverse-canvas': '#000000',
+  			'inverse-ink': '#ffffff'
+  		},
+  		borderRadius: {
+  			lg: 'var(--radius)',
+  			md: 'calc(var(--radius) - 2px)',
+  			sm: 'calc(var(--radius) - 4px)',
+  			pill: '50px'
+  		},
+  		fontFamily: {
+  			sans: [
+  				'Inter',
+  				'system-ui',
+  				'sans-serif'
+  			],
+  			mono: [
+  				'JetBrains Mono',
+  				'monospace'
+  			]
+  		},
+  		spacing: {
+  			section: '96px'
+  		},
+  		keyframes: {
+  			'accordion-down': {
+  				from: {
+  					height: '0'
+  				},
+  				to: {
+  					height: 'var(--radix-accordion-content-height)'
+  				}
+  			},
+  			'accordion-up': {
+  				from: {
+  					height: 'var(--radix-accordion-content-height)'
+  				},
+  				to: {
+  					height: '0'
+  				}
+  			}
+  		},
+  		animation: {
+  			'accordion-down': 'accordion-down 0.2s ease-out',
+  			'accordion-up': 'accordion-up 0.2s ease-out'
+  		}
+  	}
   },
   plugins: [],
 } satisfies Config
