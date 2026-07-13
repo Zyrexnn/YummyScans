@@ -8,6 +8,7 @@ import FeaturesSection from '../components/FeaturesSection'
 import GenreShowcase from '../components/GenreShowcase'
 import FAQSection from '../components/FAQSection'
 import Rekomendasi from '../components/Rekomendasi'
+import UpdateSection from '../components/UpdateSection'
 import { fetchLatest } from '../lib/komiku'
 import { ArrowRight, BookOpen, AlertCircle } from 'lucide-react'
 
@@ -16,7 +17,7 @@ let latestFeed: any[] = []
 let fetchError: string | null = null
 
 try {
-  const pages = await Promise.all([fetchLatest(1), fetchLatest(2), fetchLatest(3)])
+  const pages = await Promise.all([fetchLatest(1), fetchLatest(2), fetchLatest(3), fetchLatest(4)])
   const merged = pages.flat()
   latestFeed = merged
   mangaList = merged.slice(0, 10).map((m) => ({
@@ -40,6 +41,9 @@ try {
 
   {/* REKOMENDASI */}
   <Rekomendasi client:load manga={latestFeed} />
+
+  {/* UPDATE */}
+  <UpdateSection client:load manga={latestFeed} />
 
   {/* MARQUEE */}
   <MarqueeStrip client:load />
