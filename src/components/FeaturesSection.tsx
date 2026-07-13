@@ -37,7 +37,6 @@ export default function FeaturesSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <div className="text-eyebrow text-muted-foreground mb-3">Kenapa YummyScans?</div>
           <h2 className="text-display-lg">Baca Tanpa Batas</h2>
         </motion.div>
 

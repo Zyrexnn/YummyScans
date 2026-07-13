@@ -8,7 +8,7 @@ import FeaturesSection from '../components/FeaturesSection'
 import GenreShowcase from '../components/GenreShowcase'
 import FAQSection from '../components/FAQSection'
 import { fetchLatest } from '../lib/komiku'
-import { ArrowRight, Sparkles, TrendingUp, BookOpen, AlertCircle } from 'lucide-react'
+import { ArrowRight, Sparkles, BookOpen, AlertCircle } from 'lucide-react'
 
 let mangaList: any[] = []
 let fetchError: string | null = null
@@ -73,10 +73,6 @@ try {
     <div class="max-w-[1280px] mx-auto px-6">
       <div class="flex items-end justify-between mb-10">
         <div>
-          <div class="text-eyebrow text-muted-foreground mb-3 flex items-center gap-2">
-            <TrendingUp class="w-4 h-4" />
-            Terbaru
-          </div>
           <h2 class="text-display-lg">Manga Terbaru</h2>
         </div>
         <a href="/latest" class="yummy-btn-secondary hidden sm:inline-flex items-center gap-2">
@@ -135,7 +131,7 @@ try {
         Jelajahi ribuan manga dan manhwa dengan terjemahan bahasa Indonesia yang berkualitas.
       </p>
       <a href="/search" class="yummy-btn-primary inline-flex items-center gap-2">
-        Mulai Baca Sekarang <ArrowRight class="w-4 h-4" />
+        Mulai Baca <ArrowRight class="w-4 h-4" />
       </a>
     </div>
   </section>
