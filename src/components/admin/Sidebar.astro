@@ -1,3 +1,35 @@
 ---
+const { active = '' } = Astro.props
+
+const links = [
+  { href: '/admin', label: 'Dashboard', icon: 'M3 12l9-9 9 9M5 10v10h14V10' },
+  { href: '/admin/manga', label: 'Manga', icon: 'M4 5h16v14H4zM4 9h16M9 5v14' },
+  { href: '/admin/manga', label: 'Chapter', icon: 'M4 6h16M4 12h16M4 18h10' },
+  { href: '/admin/genres', label: 'Genre', icon: 'M4 7h16M4 12h16M4 17h16' },
+]
 ---
-<div></div>
+
+<aside class="w-60 flex-shrink-0 border-r border-black/10 bg-white">
+  <div class="flex h-16 items-center gap-2 border-b border-black/10 px-5">
+    <div class="h-8 w-8 rounded-full bg-black"></div>
+    <span class="text-lg font-bold tracking-tight text-black">YummyScans</span>
+  </div>
+  <nav class="flex flex-col gap-1 p-3">
+    {links.map((l) => (
+      <a
+        href={l.href}
+        class={
+          'flex items-center gap-3 rounded-pill px-4 py-2.5 text-sm font-medium transition ' +
+          (active === l.label
+            ? 'bg-black text-white'
+            : 'text-black/70 hover:bg-black/5')
+        }
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d={l.icon} />
+        </svg>
+        {l.label}
+      </a>
+    ))}
+  </nav>
+</aside>

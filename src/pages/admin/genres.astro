@@ -1,3 +1,81 @@
 ---
+import AdminLayout from '../../layouts/AdminLayout.astro'
+import { getGenreCounts, createGenre, updateGenre, deleteGenre, generateGenreSlug } from '../../lib/genres'
+
+let genres: any[] = []
+let error: string | null = null
+let notice: string | null = null
+
+if (Astro.request.method === 'POST') {
+  try {
+    const form = await Astro.request.formData()
+    const action = form.get('action')
+    if (action === 'add') {
+      const name = String(form.get('name') || '').trim()
+      if (name) await createGenre({ name, slug: generateGenreSlug(name) })
+      else error = 'Nama genre wajib diisi.'
+    } else if (action === 'edit') {
+      const id = form.get('id')
+      const name = String(form.get('name') || '').trim()
+      if (id && name) await updateGenre(id, { name, slug: generateGenreSlug(name) })
+    } else if (action === 'delete') {
+      const id = form.get('id')
+      const g = genres.find((x) => x.id === id)
+      if (g && g.count > 0) error = `Genre "${g.name}" masih dipakai ${g.count} manga.`
+      else if (id) await deleteGenre(id)
+    }
+    if (!error) notice = 'Tersimpan.'
+  } catch (e: any) {
+    error = e.message || 'Gagal memproses'
+  }
+}
+
+try {
+  genres = await getGenreCounts()
+} catch (e: any) {
+  error = error || e.message || 'Gagal memuat genre'
+}
 ---
-<html><body><h1>Admin - Genres</h1></body></html>
+
+<AdminLayout active="Genre" title="Genre">
+  <div class="mx-auto max-w-3xl px-6 py-8">
+    <h1 class="mb-6 text-3xl font-bold text-black">Genre</h1>
+    {error && <div class="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+    {notice && <div class="mb-4 rounded-xl border border-black/10 bg-black/5 px-4 py-3 text-sm text-black">{notice}</div>}
+
+    {/* ADD */}
+    <form method="POST" class="mb-6 flex gap-2">
+      <input type="hidden" name="action" value="add" />
+      <input
+        name="name"
+        placeholder="Nama genre baru"
+        class="flex-1 rounded-pill border border-black/15 px-5 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+      />
+      <button class="rounded-pill bg-black px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90">Tambah</button>
+    </form>
+
+    {/* LIST */}
+    <div class="overflow-hidden rounded-2xl border border-black/10">
+      {genres.map((g, i) => (
+        <div class={'flex items-center gap-3 px-4 py-3 ' + (i !== genres.length - 1 ? 'border-b border-black/10' : '')}>
+          <span class="flex-1 text-sm font-medium text-black">{g.name}</span>
+          <span class="rounded-full bg-black/5 px-3 py-1 text-xs text-black/60">{g.count} manga</span>
+          <form method="POST" class="flex items-center gap-2">
+            <input type="hidden" name="action" value="edit" />
+            <input type="hidden" name="id" value={g.id} />
+            <input name="name" value={g.name} class="w-32 rounded-full border border-black/15 px-3 py-1.5 text-sm text-black focus:outline-none" />
+            <button class="rounded-full border border-black/15 px-3 py-1.5 text-xs font-medium text-black hover:bg-black/5" aria-label="Simpan">✓</button>
+          </form>
+          <form method="POST" class="inline">
+            <input type="hidden" name="action" value="delete" />
+            <input type="hidden" name="id" value={g.id} />
+            <button class="flex h-8 w-8 items-center justify-center rounded-full border border-black/15 text-black hover:bg-red-50 hover:text-red-600" aria-label="Hapus" onclick="return confirm('Hapus genre ini?')">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V5h6v2m-9 0 1 13h8l1-13" /></svg>
+            </button>
+          </form>
+        </div>
+      ))}
+      {genres.length === 0 && <p class="px-4 py-8 text-center text-sm text-black/50">Belum ada genre.</p>}
+    </div>
+  </div>
+</AdminLayout>

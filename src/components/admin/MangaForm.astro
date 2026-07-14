@@ -1,3 +1,84 @@
 ---
+const { genres = [], values = {}, errors = {} } = Astro.props
+const selected: string[] = values.genres || []
 ---
-<div></div>
+
+<form method="POST" enctype="multipart/form-data" class="space-y-5">
+  <div>
+    <label class="mb-1.5 block text-sm font-semibold text-black">Judul</label>
+    <input
+      name="title"
+      value={values.title || ''}
+      required
+      maxlength="200"
+      class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+      placeholder="Judul manga"
+    />
+    {errors.title && <p class="mt-1 text-xs text-red-600">{errors.title}</p>}
+  </div>
+
+  <div>
+    <label class="mb-1.5 block text-sm font-semibold text-black">Cover Image</label>
+    {values.cover_url && (
+      <img src={values.cover_url} alt="" class="mb-2 h-28 w-20 rounded-md object-cover" />
+    )}
+    <input
+      type="file"
+      name="cover"
+      accept="image/png,image/jpeg,image/webp"
+      class="block w-full text-sm text-black/70 file:mr-3 file:rounded-pill file:border-0 file:bg-black file:px-4 file:py-2 file:text-white"
+    />
+    <p class="mt-1 text-xs text-black/50">Wajib diisi saat membuat. Maks 2MB (jpg/png/webp).</p>
+  </div>
+
+  <div>
+    <label class="mb-1.5 block text-sm font-semibold text-black">Genre</label>
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      {genres.map((g: any) => (
+        <label class="flex items-center gap-2 rounded-lg border border-black/15 px-3 py-2 text-sm text-black">
+          <input type="checkbox" name="genres" value={g.id} checked={selected.includes(g.id)} class="accent-black" />
+          {g.name}
+        </label>
+      ))}
+    </div>
+  </div>
+
+  <div>
+    <label class="mb-1.5 block text-sm font-semibold text-black">Status</label>
+    <select
+      name="status"
+      class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+    >
+      <option value="ongoing" selected={values.status === 'ongoing'}>Ongoing</option>
+      <option value="completed" selected={values.status === 'completed'}>Completed</option>
+      <option value="hiatus" selected={values.status === 'hiatus'}>Hiatus</option>
+    </select>
+  </div>
+
+  <div>
+    <label class="mb-1.5 block text-sm font-semibold text-black">Author</label>
+    <input
+      name="author"
+      value={values.author || ''}
+      class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+      placeholder="Opsional"
+    />
+  </div>
+
+  <div>
+    <label class="mb-1.5 block text-sm font-semibold text-black">Sinopsis</label>
+    <textarea
+      name="synopsis"
+      required
+      maxlength="2000"
+      rows="4"
+      class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+      placeholder="Sinopsis manga"
+    >{values.synopsis || ''}</textarea>
+  </div>
+
+  <div class="flex gap-3 pt-2">
+    <button type="submit" class="rounded-pill bg-black px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90">Simpan</button>
+    <a href="/admin/manga" class="rounded-pill border border-black/15 px-6 py-2.5 text-sm font-semibold text-black transition hover:bg-black/5">Batal</a>
+  </div>
+</form>

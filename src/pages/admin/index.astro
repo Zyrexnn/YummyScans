@@ -1,3 +1,87 @@
 ---
+import AdminLayout from '../../layouts/AdminLayout.astro'
+import { getMangaList, getLatestManga } from '../../lib/manga'
+import { getGenres } from '../../lib/genres'
+import { getStorageStats } from '../../lib/storage'
+import { supabase } from '../../db/supabase'
+
+let stats = { manga: 0, chapter: 0, genre: 0, storage: '0 file' }
+let recent: any[] = []
+let error: string | null = null
+
+try {
+  const [{ count: mangaCount }, chapterRes, genres, latest, storage] = await Promise.all([
+    getMangaList({ page: 1, limit: 1 }),
+    supabase.from('chapters').select('*', { count: 'exact', head: true }),
+    getGenres(),
+    getLatestManga(5),
+    getStorageStats(),
+  ])
+  stats = {
+    manga: mangaCount || 0,
+    chapter: chapterRes.count || 0,
+    genre: genres?.length || 0,
+    storage: `${storage.coversCount + storage.chaptersCount} file`,
+  }
+  recent = latest || []
+} catch (e: any) {
+  error = e.message || 'Gagal memuat data'
+}
+
+const cards = [
+  { label: 'Total Manga', value: stats.manga },
+  { label: 'Total Chapter', value: stats.chapter },
+  { label: 'Total Genre', value: stats.genre },
+  { label: 'Storage', value: stats.storage },
+]
 ---
-<html><body><h1>Admin Dashboard</h1></body></html>
+
+<AdminLayout active="Dashboard" title="Dashboard">
+  <div class="mx-auto max-w-5xl px-6 py-8">
+    <div class="mb-8 flex items-center justify-between">
+      <h1 class="text-3xl font-bold text-black">Dashboard</h1>
+      <div class="flex gap-2">
+        <a href="/admin/manga/new" class="rounded-pill bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90">+ Tambah Manga</a>
+        <a href="/admin/manga" class="rounded-pill border border-black/15 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-black/5">+ Tambah Chapter</a>
+      </div>
+    </div>
+
+    {error && (
+      <div class="mb-6 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+    )}
+
+    {/* STATS CARDS */}
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {cards.map((c) => (
+        <div class="rounded-2xl border border-black/10 bg-white p-5">
+          <p class="text-xs font-medium uppercase tracking-wide text-black/50">{c.label}</p>
+          <p class="mt-2 text-3xl font-bold text-black">{c.value}</p>
+        </div>
+      ))}
+    </div>
+
+    {/* RECENT ACTIVITY */}
+    <div class="mt-8">
+      <h2 class="mb-4 text-xl font-bold text-black">Aktivitas Terbaru</h2>
+      <div class="overflow-hidden rounded-2xl border border-black/10">
+        {recent.length > 0 ? (
+          recent.map((m, i) => (
+            <a
+              href={`/admin/manga/${m.slug}/edit`}
+              class={'flex items-center gap-3 px-4 py-3 transition hover:bg-black/5 ' + (i !== recent.length - 1 ? 'border-b border-black/10' : '')}
+            >
+              <img src={m.cover_url} alt="" class="h-10 w-8 flex-shrink-0 rounded object-cover" onerror="this.style.display='none'" />
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold text-black">{m.title}</p>
+                <p class="text-xs text-black/50">{new Date(m.updated_at).toLocaleDateString('id-ID')}</p>
+              </div>
+              <span class="rounded-full bg-black/5 px-3 py-1 text-xs font-medium capitalize text-black/70">{m.status}</span>
+            </a>
+          ))
+        ) : (
+          <p class="px-4 py-6 text-center text-sm text-black/50">Belum ada manga.</p>
+        )}
+      </div>
+    </div>
+  </div>
+</AdminLayout>
