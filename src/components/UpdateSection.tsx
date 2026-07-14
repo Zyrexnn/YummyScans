@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { LayoutGrid, List, Clock } from 'lucide-react'
+import AdBanner from './AdBanner'
 import type { LatestManga } from '../lib/komiku'
 
 type Tab = 'Project' | 'Mirror'
@@ -27,17 +28,14 @@ function isNew(s: string): boolean {
   return t.includes('menit') || t.includes('jam') || /^1\s*hari/.test(t)
 }
 
-function AdGrid() {
+function AdSlot() {
   return (
-    <div className="grid grid-cols-2 border border-hairline dark:border-border">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div
-          key={i}
-          className="flex h-[90px] items-center justify-center border-b border-r border-hairline bg-surface-soft text-sm font-medium text-muted-foreground dark:border-border dark:bg-secondary dark:text-muted-foreground md:h-[100px] [&:nth-child(2n)]:border-r-0 [&:nth-last-child(-n+2)]:border-b-0"
-        >
-          Slot Iklan
-        </div>
-      ))}
+    <div className="my-8 flex justify-center">
+      <AdBanner
+        width={300}
+        height={250}
+        adKey="e9535ef5bb08e3bcfa1e00b46abac2e6"
+      />
     </div>
   )
 }
@@ -103,10 +101,8 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
           ))}
         </div>
 
-        {/* AD GRID TOP */}
-        <div className="mb-8">
-          <AdGrid />
-        </div>
+        {/* AD TOP */}
+        <AdSlot />
 
         {/* COMIC GRID / LIST */}
         {items.length > 0 ? (
@@ -183,10 +179,8 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
           <p className="py-10 text-sm text-muted-foreground">Belum ada update.</p>
         )}
 
-        {/* AD GRID BOTTOM */}
-        <div className="my-8">
-          <AdGrid />
-        </div>
+        {/* AD BOTTOM */}
+        <AdSlot />
 
         {/* PAGINATION */}
         {totalPages > 1 && (
