@@ -1,4 +1,61 @@
 ---
-const { mangaId } = Astro.params
+import AdminLayout from '../../../../layouts/AdminLayout.astro'
+import MangaForm from '../../../../components/admin/MangaForm.astro'
+import { getGenres } from '../../../../lib/genres'
+import { getMangaBySlug, updateManga } from '../../../../lib/manga'
+import { uploadCover } from '../../../../lib/storage'
+
+const slug = Astro.params.mangaId
+let manga: any = null
+let genres: any[] = []
+let error: string | null = null
+
+try {
+  ;[manga, genres] = await Promise.all([getMangaBySlug(slug), getGenres()])
+} catch (e: any) {
+  error = e.message || 'Gagal memuat data'
+}
+
+const values = manga
+  ? {
+      title: manga.title,
+      cover_url: manga.cover_url,
+      status: manga.status,
+      author: manga.author,
+      synopsis: manga.synopsis,
+      genres: (manga.manga_genres || []).map((g: any) => g.genres?.id).filter(Boolean),
+    }
+  : {}
+
+if (Astro.request.method === 'POST' && manga) {
+  try {
+    const form = await Astro.request.formData()
+    const title = String(form.get('title') || '')
+    const status = String(form.get('status') || 'ongoing')
+    const author = String(form.get('author') || '')
+    const synopsis = String(form.get('synopsis') || '')
+    const genreIds = form.getAll('genres') as string[]
+    const cover = form.get('cover') as File | null
+
+    const payload: any = { title, status, author, synopsis, genres: genreIds }
+    if (cover && cover.size > 0) payload.cover_url = await uploadCover(manga.slug, cover)
+
+    await updateManga(manga.id, payload)
+    return Astro.redirect('/admin/manga')
+  } catch (e: any) {
+    error = e.message || 'Gagal menyimpan'
+  }
+}
 ---
-<html><body><h1>Edit Manga: {mangaId}</h1></body></html>
+
+<AdminLayout active="Manga" title="Edit Manga">
+  <div class="mx-auto max-w-2xl px-6 py-8">
+    <h1 class="mb-6 text-3xl font-bold text-black">Edit Manga</h1>
+    {error && <div class="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+    {manga ? (
+      <MangaForm genres={genres} values={values} />
+    ) : (
+      <p class="text-sm text-black/50">Manga tidak ditemukan.</p>
+    )}
+  </div>
+</AdminLayout>

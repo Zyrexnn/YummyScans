@@ -1,4 +1,63 @@
 ---
-const { mangaId } = Astro.params
+import AdminLayout from '../../../../../layouts/AdminLayout.astro'
+import { getMangaBySlug } from '../../../../../lib/manga'
+import { getChaptersByMangaId, deleteChapter } from '../../../../../lib/chapter'
+
+const slug = Astro.params.mangaId
+let manga: any = null
+let chapters: any[] = []
+let error: string | null = null
+
+if (Astro.request.method === 'POST') {
+  try {
+    const form = await Astro.request.formData()
+    const id = form.get('id')
+    if (id) {
+      await deleteChapter(id)
+      return Astro.redirect(`/admin/manga/${slug}/chapters`)
+    }
+  } catch (e: any) {
+    error = e.message || 'Gagal menghapus chapter'
+  }
+}
+
+try {
+  manga = await getMangaBySlug(slug)
+  if (manga) chapters = await getChaptersByMangaId(manga.id)
+} catch (e: any) {
+  error = error || e.message || 'Gagal memuat chapter'
+}
 ---
-<html><body><h1>Chapters: {mangaId}</h1></body></html>
+
+<AdminLayout active="Manga" title="Chapter">
+  <div class="mx-auto max-w-3xl px-6 py-8">
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <a href="/admin/manga" class="text-xs text-black/50 hover:underline">← Manga</a>
+        <h1 class="text-2xl font-bold text-black">{manga?.title || 'Chapter'}</h1>
+      </div>
+      {manga && (
+        <a href={`/admin/manga/${slug}/chapters/new`} class="rounded-pill bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90">+ Tambah Chapter</a>
+      )}
+    </div>
+
+    {error && <div class="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+
+    <div class="overflow-hidden rounded-2xl border border-black/10">
+      {chapters.map((c, i) => (
+        <div class={'flex items-center gap-3 px-4 py-3 ' + (i !== chapters.length - 1 ? 'border-b border-black/10' : '')}>
+          <span class="w-16 text-sm font-bold text-black">CH {c.chapter_number}</span>
+          <span class="flex-1 truncate text-sm text-black/70">{c.title || '—'}</span>
+          <span class="rounded-full bg-black/5 px-3 py-1 text-xs text-black/60">{c.page_count} hlm</span>
+          <form method="POST" class="inline">
+            <input type="hidden" name="id" value={c.id} />
+            <button class="flex h-8 w-8 items-center justify-center rounded-full border border-black/15 text-black hover:bg-red-50 hover:text-red-600" aria-label="Hapus" onclick="return confirm('Hapus chapter ini?')">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V5h6v2m-9 0 1 13h8l1-13" /></svg>
+            </button>
+          </form>
+        </div>
+      ))}
+      {chapters.length === 0 && <p class="px-4 py-8 text-center text-sm text-black/50">Belum ada chapter.</p>}
+    </div>
+  </div>
+</AdminLayout>

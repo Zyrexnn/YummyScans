@@ -1,3 +1,56 @@
 ---
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import MangaForm from '../../../components/admin/MangaForm.astro'
+import { getGenres } from '../../../lib/genres'
+import { createManga, generateSlug } from '../../../lib/manga'
+import { uploadCover } from '../../../lib/storage'
+
+let genres: any[] = []
+let error: string | null = null
+
+try {
+  genres = await getGenres()
+} catch (e: any) {
+  error = e.message || 'Gagal memuat genre'
+}
+
+if (Astro.request.method === 'POST') {
+  try {
+    const form = await Astro.request.formData()
+    const title = String(form.get('title') || '')
+    const status = String(form.get('status') || 'ongoing')
+    const author = String(form.get('author') || '')
+    const synopsis = String(form.get('synopsis') || '')
+    const genreIds = form.getAll('genres') as string[]
+    const cover = form.get('cover') as File | null
+
+    if (!title || !synopsis) return Astro.redirect('/admin/manga/new')
+    if (!cover || cover.size === 0) {
+      error = 'Cover image wajib diisi.'
+    } else {
+      const slug = generateSlug(title)
+      const coverUrl = await uploadCover(slug, cover)
+      await createManga({
+        title,
+        slug,
+        cover_url: coverUrl,
+        status,
+        author,
+        synopsis,
+        genres: genreIds,
+      })
+      return Astro.redirect('/admin/manga')
+    }
+  } catch (e: any) {
+    error = e.message || 'Gagal menyimpan'
+  }
+}
 ---
-<html><body><h1>Admin - New Manga</h1></body></html>
+
+<AdminLayout active="Manga" title="Tambah Manga">
+  <div class="mx-auto max-w-2xl px-6 py-8">
+    <h1 class="mb-6 text-3xl font-bold text-black">Tambah Manga</h1>
+    {error && <div class="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+    <MangaForm genres={genres} />
+  </div>
+</AdminLayout>

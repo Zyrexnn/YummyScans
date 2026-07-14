@@ -1,3 +1,22 @@
 ---
+import Sidebar from '../components/admin/Sidebar.astro'
+
+const { active = '', title = 'Admin' } = Astro.props
 ---
-<html><body><slot /></body></html>
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · YummyScans Admin</title>
+  </head>
+  <body class="bg-white text-black antialiased">
+    <div class="flex min-h-screen">
+      <Sidebar active={active} />
+      <main class="flex-1 overflow-x-hidden">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

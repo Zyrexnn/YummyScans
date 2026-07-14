@@ -1,3 +1,67 @@
 ---
+import { supabase } from '../../db/supabase'
+
+let error: string | null = null
+
+if (Astro.url.searchParams.get('logout')) {
+  Astro.cookies.delete('sb-access-token')
+  Astro.cookies.delete('sb-refresh-token')
+  return Astro.redirect('/admin/login')
+}
+
+if (Astro.request.method === 'POST') {
+  try {
+    const form = await Astro.request.formData()
+    const email = String(form.get('email') || '')
+    const password = String(form.get('password') || '')
+    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    if (authError) {
+      error = authError.message
+    } else if (data.session) {
+      Astro.cookies.set('sb-access-token', data.session.access_token, {
+        httpOnly: true,
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+        sameSite: 'lax',
+      })
+      Astro.cookies.set('sb-refresh-token', data.session.refresh_token, {
+        httpOnly: true,
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+        sameSite: 'lax',
+      })
+      return Astro.redirect('/admin')
+    }
+  } catch (e: any) {
+    error = e.message || 'Gagal login'
+  }
+}
 ---
-<html><body><h1>Admin Login</h1></body></html>
+
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login · YummyScans Admin</title>
+  </head>
+  <body class="flex min-h-screen items-center justify-center bg-white text-black antialiased">
+    <div class="w-full max-w-sm px-6">
+      <div class="mb-8 flex items-center gap-2 justify-center">
+        <div class="h-8 w-8 rounded-full bg-black"></div>
+        <span class="text-xl font-bold tracking-tight">YummyScans Admin</span>
+      </div>
+      <form method="POST" class="space-y-4">
+        {error && <div class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+        <div>
+          <label class="mb-1.5 block text-sm font-semibold">Email</label>
+          <input type="email" name="email" required class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/20" />
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-semibold">Password</label>
+          <input type="password" name="password" required class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/20" />
+        </div>
+        <button type="submit" class="w-full rounded-pill bg-black px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-90">Masuk</button>
+      </form>
+    </div>
+  </body>
+</html>
