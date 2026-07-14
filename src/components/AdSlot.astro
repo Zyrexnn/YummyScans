@@ -7,21 +7,19 @@ interface Props {
 }
 
 const { width, height, adKey, class: className } = Astro.props
+const uid = Math.random().toString(36).slice(2, 10)
 ---
 
 <div class:list={[className]} style={`min-width:${width}px;min-height:${height}px;display:flex;justify-content:center;overflow:hidden;`}>
-  <div id={`ad-${adKey}`} style={`width:${width}px;height:${height}px;`}></div>
-  <script is:inline define:vars={{ adKey, width, height }}>
-    (function() {
-      if (window['_ad_' + adKey]) return;
-      window['_ad_' + adKey] = true;
-      atOptions = { 'key': adKey, 'format': 'iframe', 'height': height, 'width': width, 'params': {} };
-      var container = document.getElementById('ad-' + adKey);
-      if (!container) return;
+  <div id={`ad-${uid}`} style={`width:${width}px;height:${height}px;`}></div>
+  <script is:inline define:vars={{ adKey, width, height, uid }}>
+    atOptions = { 'key': adKey, 'format': 'iframe', 'height': height, 'width': width, 'params': {} };
+    var container = document.getElementById('ad-' + uid);
+    if (container) {
       var s = document.createElement('script');
       s.src = 'https://www.highperformanceformat.com/' + adKey + '/invoke.js';
       s.async = true;
       container.appendChild(s);
-    })();
+    }
   </script>
 </div>
