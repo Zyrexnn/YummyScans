@@ -1,0 +1,24 @@
+---
+interface Props {
+  width: number
+  height: number
+  adKey: string
+  class?: string
+}
+
+const { width, height, adKey, class: className } = Astro.props
+---
+
+<div class:list={[className]} style={`min-width:${width}px;min-height:${height}px;display:flex;justify-content:center;overflow:hidden;`}>
+  <script is:inline define:vars={{ adKey, width, height }}>
+    (function() {
+      if (window['_ad_' + adKey]) return;
+      window['_ad_' + adKey] = true;
+      atOptions = { 'key': adKey, 'format': 'iframe', 'height': height, 'width': width, 'params': {} };
+      var s = document.createElement('script');
+      s.src = 'https://www.highperformanceformat.com/' + adKey + '/invoke.js';
+      s.async = true;
+      document.currentScript.parentNode.appendChild(s);
+    })();
+  </script>
+</div>

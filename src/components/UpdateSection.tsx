@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react'
 import { LayoutGrid, List, Clock } from 'lucide-react'
-import AdBanner from './AdBanner'
 import type { LatestManga } from '../lib/komiku'
 
 type Tab = 'Project' | 'Mirror'
@@ -26,18 +25,6 @@ function relTime(s: string): string {
 function isNew(s: string): boolean {
   const t = s.toLowerCase()
   return t.includes('menit') || t.includes('jam') || /^1\s*hari/.test(t)
-}
-
-function AdSlot() {
-  return (
-    <div className="my-8 flex justify-center">
-      <AdBanner
-        width={300}
-        height={250}
-        adKey="e9535ef5bb08e3bcfa1e00b46abac2e6"
-      />
-    </div>
-  )
 }
 
 export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
@@ -100,9 +87,6 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
             </button>
           ))}
         </div>
-
-        {/* AD TOP */}
-        <AdSlot />
 
         {/* COMIC GRID / LIST */}
         {items.length > 0 ? (
@@ -178,9 +162,6 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
         ) : (
           <p className="py-10 text-sm text-muted-foreground">Belum ada update.</p>
         )}
-
-        {/* AD BOTTOM */}
-        <AdSlot />
 
         {/* PAGINATION */}
         {totalPages > 1 && (

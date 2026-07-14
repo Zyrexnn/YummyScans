@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
-import AdBanner from './AdBanner'
 
 type Slide = {
   title: string
@@ -183,22 +182,6 @@ export default function Hero() {
               </button>
             </div>
           </div>
-        </div>
-
-        {/* AD */}
-        <div className="mt-10 flex justify-center">
-          <AdBanner
-            width={728}
-            height={90}
-            adKey="2d5b42ffd6cb16d65bd3eb553d7e0eec"
-            className="hidden md:block"
-          />
-          <AdBanner
-            width={320}
-            height={50}
-            adKey="a675c284043575bba74699224c71581c"
-            className="block md:hidden"
-          />
         </div>
       </div>
     </section>

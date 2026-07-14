@@ -1,6 +1,6 @@
 ---
 import EditorialLayout from '../../../layouts/EditorialLayout.astro'
-import AdBanner from '../../../components/AdBanner'
+import AdSlot from '../../../components/AdSlot.astro'
 import { Badge } from '../../../components/ui/badge'
 import { ArrowLeft, BookOpen, User, Calendar, ArrowRight, Clock } from 'lucide-react'
 import { fetchDetail, fetchGenreManga } from '../../../lib/komiku'
@@ -196,11 +196,10 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
       {/* AD */}
       <section class="py-6 bg-background">
         <div class="max-w-[1280px] mx-auto px-6 flex justify-center">
-          <AdBanner
+          <AdSlot
             width={300}
             height={250}
             adKey="e9535ef5bb08e3bcfa1e00b46abac2e6"
-            client:visible
           />
         </div>
       </section>
