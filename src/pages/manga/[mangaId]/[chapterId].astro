@@ -64,7 +64,7 @@ const backUrl = `/manga/${mangaId}`
       .reader-container {
         max-width: 800px;
         margin: 0 auto;
-        padding: 0;
+        padding: 0 0 80px 0;
       }
       .reader-container img {
         width: 100%;
@@ -79,31 +79,42 @@ const backUrl = `/manga/${mangaId}`
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         border-bottom: 1px solid rgba(255,255,255,0.08);
-        padding: 12px 24px;
+        padding: 0;
         display: flex;
-        align-items: center;
-        justify-content: space-between;
+        align-items: stretch;
       }
-      .top-bar a {
+      .top-bar a.back-link {
         color: #ffffff;
         text-decoration: none;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         transition: opacity 0.2s;
+        padding: 12px 16px;
+        flex-shrink: 0;
+        border-right: 1px solid rgba(255,255,255,0.08);
       }
-      .top-bar a:hover { opacity: 0.7; }
+      .top-bar a.back-link:hover { opacity: 0.7; }
       .top-bar .title {
-        font-size: 14px;
-        font-weight: 700;
-        text-align: center;
-        flex: 1;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.3;
+        color: rgba(255,255,255,0.9);
+        padding: 10px 16px;
+        min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        display: flex;
+        align-items: center;
+      }
+      .top-bar .title .chapter-label {
         color: #ffffff;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-left: 4px;
       }
       .nav-buttons {
         position: fixed;
@@ -170,11 +181,14 @@ const backUrl = `/manga/${mangaId}`
         transition: background 0.2s;
       }
       .btn-back:hover { background: rgba(255,255,255,0.18); }
+      .nav-buttons a .btn-label { display: inline; }
       @media (max-width: 640px) {
-        .top-bar { padding: 10px 16px; }
-        .top-bar .title { font-size: 12px; }
+        .top-bar a.back-link { font-size: 12px; padding: 10px 12px; gap: 4px; }
+        .top-bar a.back-link svg { width: 14px; height: 14px; }
+        .top-bar .title { font-size: 12px; padding: 8px 12px; }
         .nav-buttons { bottom: 16px; padding: 6px 8px; gap: 4px; }
-        .nav-buttons a { font-size: 12px; padding: 6px 14px; }
+        .nav-buttons a { font-size: 12px; padding: 6px 10px; }
+        .nav-buttons a .btn-label { display: none; }
       }
     </style>
   </head>
@@ -192,15 +206,13 @@ const backUrl = `/manga/${mangaId}`
     ) : (
       <>
         <div class="top-bar">
-          <a href={backUrl}>
+          <a href={backUrl} class="back-link">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
             Kembali
           </a>
           <div class="title">
-            {mangaTitle ? `${mangaTitle} — ` : ''}Chapter {chapterNum}
-            {chapterTitle && `: ${chapterTitle}`}
+            <span class="chapter-label">Ch.{chapterNum}</span>
           </div>
-          <span></span>
         </div>
 
         <div class="reader-container">
@@ -219,14 +231,14 @@ const backUrl = `/manga/${mangaId}`
         <div class="nav-buttons">
           <a href={prevChapterSlug ? `/manga/${mangaId}/${prevChapterSlug}` : '#'} class={!prevChapterSlug ? 'disabled' : ''}>
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-            Prev
+            <span class="btn-label">Prev</span>
           </a>
           <a href={backUrl}>
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Daftar
+            <span class="btn-label">Daftar</span>
           </a>
           <a href={nextChapterSlug ? `/manga/${mangaId}/${nextChapterSlug}` : '#'} class={!nextChapterSlug ? 'disabled' : ''}>
-            Next
+            <span class="btn-label">Next</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
           </a>
         </div>
