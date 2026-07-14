@@ -2,101 +2,120 @@
 
 import { motion } from 'framer-motion'
 import { Badge } from './ui/badge'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, Clock } from 'lucide-react'
 
 interface MangaCardProps {
   title: string
   coverUrl: string | null
   slug: string
+  type?: string
+  chapter?: string
+  updatedOn?: string
   genres?: { id: string; name: string; slug: string }[]
   status?: string
   index?: number
+}
+
+const FLAG: Record<string, string> = { Manhwa: '🇰🇷', Manga: '🇯🇵', Manhua: '🇨🇳' }
+
+function parseDuration(updatedOn: string): string {
+  const text = updatedOn.toLowerCase()
+  const num = text.match(/(\d+)/)?.[1] || '1'
+  if (text.includes('menit')) return `${num}m`
+  if (text.includes('jam')) return `${num}h`
+  if (text.includes('hari')) return `${num}d`
+  if (text.includes('minggu')) return `${num}w`
+  return `${num}d`
+}
+
+function isNew(updatedOn: string): boolean {
+  const text = updatedOn.toLowerCase()
+  return text.includes('menit') || text.includes('jam') || /^1\s*hari/.test(text)
 }
 
 export default function MangaCard({
   title,
   coverUrl,
   slug,
+  type,
+  chapter,
+  updatedOn,
   genres,
   status,
   index = 0
 }: MangaCardProps) {
+  const fresh = updatedOn ? isNew(updatedOn) : false
+
   return (
     <motion.a
       href={`/manga/${slug}`}
       className="group block"
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
+      viewport={{ once: true, margin: '-30px' }}
+      transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
-      <div className="relative overflow-hidden rounded-[16px] bg-muted">
-        <div className="aspect-[3/4] overflow-hidden relative">
-          {coverUrl ? (
-            <motion.img
-              src={coverUrl}
-              alt={title}
-              className="w-full h-full object-cover"
-              loading="lazy"
-              whileHover={{ scale: 1.08 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-              onError={(e) => {
-                const target = e.target as HTMLImageElement
-                target.style.display = 'none'
-                const parent = target.parentElement
-                if (parent && !parent.querySelector('.fallback')) {
-                  const div = document.createElement('div')
-                  div.className = 'fallback absolute inset-0 flex flex-col items-center justify-center bg-muted gap-2'
-                  div.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg><span class="text-xs text-muted-foreground font-medium">No Cover</span>'
-                  parent.appendChild(div)
-                }
-              }}
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-              <BookOpen className="w-12 h-12 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground font-medium">No Cover</span>
-            </div>
-          )}
+      <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-secondary">
+        {coverUrl ? (
+          <motion.img
+            src={coverUrl}
+            alt={title}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement
+              target.style.display = 'none'
+              const parent = target.parentElement
+              if (parent && !parent.querySelector('.fallback')) {
+                const div = document.createElement('div')
+                div.className = 'fallback absolute inset-0 flex flex-col items-center justify-center bg-muted gap-2'
+                div.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg><span class="text-xs text-muted-foreground font-medium">No Cover</span>'
+                parent.appendChild(div)
+              }
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+            <BookOpen className="w-12 h-12 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground font-medium">No Cover</span>
+          </div>
+        )}
 
-          {/* Shimmer */}
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
+        {/* top-left: time + NEW */}
+        <div className="absolute left-1.5 top-1.5 flex items-center gap-1">
+          {updatedOn && (
+            <span className="flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+              <Clock className="h-3 w-3" />
+              {parseDuration(updatedOn)}
+            </span>
+          )}
+          {fresh && <span className="rounded bg-red-600 px-1 py-0.5 text-[9px] font-bold text-white">NEW</span>}
         </div>
 
-        {/* Status Badge */}
-        {status && (
-          <div className="absolute top-3 right-3">
+        {/* top-right: flag + status */}
+        <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
+          {status && (
             <Badge
               variant={status === 'completed' ? 'default' : 'secondary'}
-              className="text-[10px] font-mono uppercase tracking-wider rounded-[8px] px-2.5 py-1 shadow-lg backdrop-blur-sm"
+              className="text-[9px] font-mono uppercase tracking-wider rounded px-1.5 py-0.5 shadow backdrop-blur-sm"
             >
               {status === 'ongoing' ? 'Ongoing' : status === 'completed' ? 'Tamat' : 'Hiatus'}
             </Badge>
-          </div>
-        )}
+          )}
+          {type && FLAG[type] && (
+            <span className="flex h-4 w-4 items-center justify-center rounded bg-background text-[10px] leading-none shadow">
+              {FLAG[type]}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Title */}
-      <motion.h3
-        className="text-[15px] font-semibold mt-3 line-clamp-2 text-foreground group-hover:text-foreground/70 transition-colors duration-200 leading-tight"
-        whileHover={{ x: 2 }}
-        transition={{ duration: 0.2 }}
-      >
+      <h3 className="mt-2 line-clamp-2 text-[13px] font-bold leading-tight text-foreground group-hover:text-foreground/70 transition-colors duration-200">
         {title}
-      </motion.h3>
+      </h3>
 
-      {/* Genres */}
-      {genres && genres.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {genres.slice(0, 3).map((genre) => (
-            <span
-              key={genre.id}
-              className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground bg-muted px-2 py-0.5 rounded-[4px]"
-            >
-              {genre.name}
-            </span>
-          ))}
-        </div>
+      {chapter && (
+        <p className="mt-1 truncate text-[10px] text-muted-foreground">{chapter}</p>
       )}
     </motion.a>
   )

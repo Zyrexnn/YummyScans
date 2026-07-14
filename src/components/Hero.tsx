@@ -82,11 +82,11 @@ export default function Hero() {
 
   return (
     <section className="bg-background transition-theme">
-      <div className="max-w-[1280px] mx-auto px-6 pt-10">
+      <div className="max-w-[1280px] mx-auto px-4 pt-6 sm:px-6 sm:pt-10">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[65fr_35fr]">
           {/* HERO CAROUSEL */}
           <div className="relative">
-            <div className="relative aspect-[16/7] w-full overflow-hidden rounded-2xl bg-secondary">
+            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-secondary lg:aspect-[16/7]">
               {slides.map((s, i) => (
                 <div
                   key={i}
@@ -97,18 +97,18 @@ export default function Hero() {
                 >
                   <img src={s.image} alt={s.title} className="h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-3 p-6 md:p-8">
-                    <h2 className="text-2xl font-bold text-white md:text-4xl">{s.title}</h2>
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-white">
-                        <Star className="h-4 w-4 fill-accent text-accent" />
+                  <div className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-2 p-4 sm:gap-3 sm:p-6 md:p-8">
+                    <h2 className="text-xl font-bold text-white sm:text-2xl md:text-4xl">{s.title}</h2>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-white sm:text-sm">
+                        <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-accent text-accent" />
                         {s.rating.toFixed(1)}
                       </span>
-                      <span className="rounded-full bg-accent/90 px-3 py-0.5 text-xs font-semibold text-accent-foreground">
+                      <span className="rounded-full bg-accent/90 px-2.5 py-0.5 text-[10px] font-semibold text-accent-foreground sm:text-xs">
                         {s.genre}
                       </span>
                     </div>
-                    <p className="line-clamp-2 max-w-xl text-sm text-white/70 md:text-base">{s.description}</p>
+                    <p className="line-clamp-2 max-w-xl text-xs text-white/70 sm:text-sm md:text-base">{s.description}</p>
                   </div>
                 </div>
               ))}
@@ -136,28 +136,28 @@ export default function Hero() {
           {/* PENGUMUMAN PANEL */}
           <div className="flex flex-col">
             <div className="mb-3 flex items-end justify-between">
-              <h3 className="text-lg font-bold text-foreground">Pengumuman</h3>
+              <h3 className="text-base font-bold text-foreground sm:text-lg">Pengumuman</h3>
               <a href="#" className="text-xs text-muted-foreground hover:text-foreground">
                 Semua
               </a>
             </div>
 
-            <div className="flex flex-1 flex-col gap-3">
+            <div className="flex flex-1 flex-col gap-2 sm:gap-3">
               {[0, 1].map((offset) => {
                 const a = announcements[(ann + offset) % announcements.length]
                 return (
                   <div
                     key={offset}
-                    className="flex items-center gap-3 rounded-xl bg-secondary p-3 transition"
+                    className="flex items-center gap-2.5 rounded-xl bg-secondary p-2.5 transition sm:gap-3 sm:p-3"
                   >
                     <img
                       src={a.image}
                       alt={a.title}
-                      className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
+                      className="h-11 w-11 flex-shrink-0 rounded-lg object-cover sm:h-14 sm:w-14"
                     />
                     <div className="min-w-0">
-                      <p className="line-clamp-2 text-sm font-semibold text-foreground">{a.title}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{a.date}</p>
+                      <p className="line-clamp-2 text-[13px] font-semibold text-foreground sm:text-sm">{a.title}</p>
+                      <p className="mt-1 text-[10px] text-muted-foreground sm:text-xs">{a.date}</p>
                     </div>
                   </div>
                 )

@@ -113,7 +113,7 @@ function Card({ m }: { m: Manga }) {
   const fresh = isNew(m.updatedOn)
   return (
     <a href={`/manga/${m.slug}`} className="group block">
-      <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-secondary">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-secondary">
         <img
           src={m.coverUrl}
           alt={m.title}
@@ -123,28 +123,21 @@ function Card({ m }: { m: Manga }) {
             ;(e.target as HTMLImageElement).style.display = 'none'
           }}
         />
+        {/* top-left: time */}
         <div className="absolute left-1.5 top-1.5 flex items-center gap-1">
-          <span className="flex items-center gap-1 rounded bg-black/65 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+          <span className="flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
             <Clock className="h-3 w-3" />
             {shortRel(m.updatedOn)}
           </span>
-          {fresh && <span className="rounded bg-red-600 px-1 py-0.5 text-[9px] font-bold text-white">UP</span>}
-        </div>
-        <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
           {fresh && <span className="rounded bg-red-600 px-1 py-0.5 text-[9px] font-bold text-white">NEW</span>}
-          <span className="flex h-4 w-4 items-center justify-center rounded bg-white text-[9px] leading-none shadow">
-            {FLAG[m.type] || '🏳️'}
-          </span>
         </div>
+        {/* top-right: flag */}
+        <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-background text-[10px] leading-none shadow">
+          {FLAG[m.type] || '🏳️'}
+        </span>
       </div>
       <h3 className="mt-2 line-clamp-2 text-[13px] font-bold leading-tight text-foreground">{m.title}</h3>
-      <div className="mt-1.5 flex items-center justify-between text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Eye className="h-3 w-3" />
-          {fakeViews(m.slug)}
-        </span>
-        <span>CH.{chapterNum(m.chapter)}</span>
-      </div>
+      <p className="mt-1 truncate text-[10px] text-muted-foreground">{m.chapter || 'Ch. -'}</p>
     </a>
   )
 }
@@ -233,7 +226,7 @@ export default function SearchExplorer({
             value={genreSearch}
             onChange={(e) => setGenreSearch(e.target.value)}
             placeholder="Search Genre"
-            className="h-9 w-full rounded-lg border border-border bg-secondary pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#6d28d9]/40"
+            className="h-9 w-full rounded-lg border border-border bg-secondary pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
           />
         </div>
         <div className="grid max-h-56 grid-cols-2 gap-1.5 overflow-y-auto pr-1">
@@ -245,7 +238,7 @@ export default function SearchExplorer({
                 onClick={() => (window.location.href = buildHref({ genre: active ? '' : g.slug, page: 1 }))}
                 className={
                   'rounded-lg px-2.5 py-1.5 text-left text-[12px] font-medium transition ' +
-                  (active ? 'bg-[#6d28d9] text-white' : 'bg-secondary text-foreground/80 hover:bg-muted')
+                  (active ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground/80 hover:bg-muted')
                 }
               >
                 {g.name}
@@ -288,7 +281,7 @@ export default function SearchExplorer({
                 onClick={() => (window.location.href = buildHref({ type: active ? '' : f, page: 1 }))}
                 className={
                   'rounded-lg px-3 py-1.5 text-[12px] font-medium transition ' +
-                  (active ? 'bg-[#6d28d9] text-white' : 'bg-secondary text-foreground/80 hover:bg-muted')
+                  (active ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground/80 hover:bg-muted')
                 }
               >
                 {f}
@@ -308,7 +301,7 @@ export default function SearchExplorer({
                 onClick={() => (window.location.href = buildHref({ type: active ? '' : f, page: 1 }))}
                 className={
                   'rounded-lg px-3 py-1.5 text-[12px] font-medium transition ' +
-                  (active ? 'bg-[#6d28d9] text-white' : 'bg-secondary text-foreground/80 hover:bg-muted')
+                  (active ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground/80 hover:bg-muted')
                 }
               >
                 {f}
@@ -331,14 +324,14 @@ export default function SearchExplorer({
       <Collapsible title="Author">
         <input
           placeholder="Author..."
-          className="h-9 w-full rounded-lg border border-border bg-secondary px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#6d28d9]/40"
+          className="h-9 w-full rounded-lg border border-border bg-secondary px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
         />
       </Collapsible>
 
       <Collapsible title="Artist">
         <input
           placeholder="Artist..."
-          className="h-9 w-full rounded-lg border border-border bg-secondary px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#6d28d9]/40"
+          className="h-9 w-full rounded-lg border border-border bg-secondary px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
         />
       </Collapsible>
     </div>
@@ -378,7 +371,7 @@ export default function SearchExplorer({
                   name="q"
                   defaultValue={query}
                   placeholder="Cari"
-                  className="h-10 w-full rounded-lg border border-border bg-secondary pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#6d28d9]/40"
+                  className="h-10 w-full rounded-lg border border-border bg-secondary pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
                 />
               </form>
 
@@ -388,7 +381,7 @@ export default function SearchExplorer({
                   aria-label="Grid view"
                   className={
                     'flex h-10 w-10 items-center justify-center rounded-lg transition ' +
-                    (view === 'grid' ? 'bg-[#6d28d9] text-white' : 'bg-secondary text-foreground/70')
+                    (view === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground/70')
                   }
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -398,7 +391,7 @@ export default function SearchExplorer({
                   aria-label="List view"
                   className={
                     'flex h-10 w-10 items-center justify-center rounded-lg transition ' +
-                    (view === 'list' ? 'bg-[#6d28d9] text-white' : 'bg-secondary text-foreground/70')
+                    (view === 'list' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground/70')
                   }
                 >
                   <List className="h-4 w-4" />
@@ -417,7 +410,7 @@ export default function SearchExplorer({
 
               <button
                 aria-label="Export"
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#6d28d9] text-[#a855f7] transition hover:bg-[#6d28d9]/10"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-foreground/70 transition hover:bg-secondary"
               >
                 <ArrowDownToLine className="h-4 w-4" />
               </button>
@@ -468,7 +461,7 @@ export default function SearchExplorer({
                     ‹
                   </a>
                 )}
-                <span className="flex h-9 min-w-9 items-center justify-center rounded-lg border border-[#a855f7] bg-[#6d28d9] px-3 text-sm font-semibold text-white">
+                <span className="flex h-9 min-w-9 items-center justify-center rounded-lg border border-accent bg-primary px-3 text-sm font-semibold text-primary-foreground">
                   {page}
                 </span>
                 {hasMore && (
@@ -499,7 +492,7 @@ export default function SearchExplorer({
             {Sidebar}
             <button
               onClick={() => setDrawer(false)}
-              className="mt-4 w-full rounded-lg bg-[#6d28d9] py-2.5 text-sm font-semibold text-white"
+              className="mt-4 w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground"
             >
               Terapkan
             </button>

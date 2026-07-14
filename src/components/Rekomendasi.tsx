@@ -54,48 +54,34 @@ export default function Rekomendasi({ manga }: { manga: LatestManga[] }) {
               <a
                 key={m.slug + i}
                 href={`/manga/${m.slug}`}
-                className="group relative w-[140px] flex-shrink-0 snap-start overflow-hidden rounded-lg bg-secondary md:w-[160px]"
+                className="group w-[140px] flex-shrink-0 snap-start md:w-[160px]"
               >
-                <div className="relative aspect-[3/4] w-full overflow-hidden">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-secondary">
                   <img
                     src={m.coverUrl}
                     alt={m.title}
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     onError={(e) => {
-                      const t = e.target as HTMLImageElement
-                      t.style.display = 'none'
+                      ;(e.target as HTMLImageElement).style.display = 'none'
                     }}
                   />
-
-                  {/* top-left badges */}
-                  <div className="absolute left-2 top-2 flex items-center gap-1">
-                    <span className="flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                  {/* top-left: time */}
+                  <div className="absolute left-1.5 top-1.5 flex items-center gap-1">
+                    <span className="flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
                       <Clock className="h-3 w-3" />
                       {parseDuration(m.updatedOn)}
                     </span>
-                    {isNew(m.updatedOn) && (
-                      <span className="rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground">
-                        NEW
-                      </span>
-                    )}
                   </div>
-
-                  {/* top-right flag */}
-                  <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded bg-background text-[11px] leading-none shadow">
+                  {/* top-right: flag */}
+                  <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-background text-[10px] leading-none shadow">
                     {FLAG[m.type as Tab] || '🏳️'}
                   </span>
-
-                  {/* bottom gradient + title */}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-2.5 pt-8">
-                    <h3 className="line-clamp-2 text-[13px] font-bold leading-tight text-white">
-                      {m.title}
-                    </h3>
-                    {m.chapter && (
-                      <p className="mt-1 truncate text-[10px] text-white/50">{m.chapter}</p>
-                    )}
-                  </div>
                 </div>
+                <h3 className="mt-2 line-clamp-2 text-[13px] font-bold leading-tight text-foreground">{m.title}</h3>
+                {m.chapter && (
+                  <p className="mt-1 truncate text-[10px] text-muted-foreground">{m.chapter}</p>
+                )}
               </a>
             ))
           ) : (

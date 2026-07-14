@@ -14,7 +14,8 @@ let error: string | null = null
 let hasMore = false
 
 const mapFn = (m: any) => ({
-  id: m.slug, title: m.title, slug: m.slug, coverUrl: m.coverUrl,
+  id: m.slug, title: m.title, slug: m.slug, coverUrl: m.coverUrl, type: m.type || '',
+  chapter: m.chapter || '', updatedOn: m.updatedOn || '',
   status: m.type || 'ongoing', genres: [{ id: '', name: m.type || '', slug: '' }],
 })
 
@@ -118,6 +119,9 @@ function pageUrl(p: number) {
                 title={manga.title}
                 coverUrl={manga.coverUrl}
                 slug={manga.slug}
+                type={manga.type}
+                chapter={manga.chapter}
+                updatedOn={manga.updatedOn}
                 genres={manga.genres}
                 status={manga.status}
                 index={i}

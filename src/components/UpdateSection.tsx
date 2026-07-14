@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { LayoutGrid, List, Users } from 'lucide-react'
+import { LayoutGrid, List, Clock } from 'lucide-react'
 import type { LatestManga } from '../lib/komiku'
 
 type Tab = 'Project' | 'Mirror'
@@ -47,8 +47,10 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
   const [view, setView] = useState<View>('grid')
   const [page, setPage] = useState(1)
 
-  // ponytail: Project/Mirror categories have no real source yet — show empty until a dedicated feed exists
-  const items = useMemo<LatestManga[]>(() => [], [manga, tab, page])
+  const items = useMemo<LatestManga[]>(() => {
+    const start = (page - 1) * PER_PAGE
+    return manga.slice(start, start + PER_PAGE)
+  }, [manga, page])
 
   const totalPages = Math.max(1, Math.ceil(manga.length / PER_PAGE))
 
@@ -116,50 +118,33 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
                   href={`/manga/${m.slug}`}
                   className="group block"
                 >
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-secondary">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-secondary">
                     <img
                       src={m.coverUrl}
                       alt={m.title}
                       loading="lazy"
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
-                        const t = e.target as HTMLImageElement
-                        t.style.display = 'none'
+                        ;(e.target as HTMLImageElement).style.display = 'none'
                       }}
                     />
-                    <span className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 text-[9px] font-medium text-white backdrop-blur-sm">
-                      <Users className="h-3 w-3" />
-                      Yummy
-                    </span>
-                    <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
+                    {/* top-left: time */}
+                    <div className="absolute left-1.5 top-1.5 flex items-center gap-1">
+                      <span className="flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                        <Clock className="h-3 w-3" />
+                        {relTime(m.updatedOn)}
+                      </span>
                       {isNew(m.updatedOn) && (
-                        <span className="rounded bg-destructive px-1 py-0.5 text-[10px] font-bold text-destructive-foreground">N</span>
+                        <span className="rounded bg-red-600 px-1 py-0.5 text-[9px] font-bold text-white">NEW</span>
                       )}
-                      <span className="flex h-4 w-4 items-center justify-center rounded bg-background text-[10px] leading-none shadow">
-                        {FLAG[m.type] || '🏳️'}
-                      </span>
                     </div>
+                    {/* top-right: flag */}
+                    <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-background text-[10px] leading-none shadow">
+                      {FLAG[m.type] || '🏳️'}
+                    </span>
                   </div>
-
-                  <h3 className="mt-2 line-clamp-2 text-[13px] font-bold leading-tight text-foreground">
-                    {isNew(m.updatedOn) && (
-                      <span className="mr-1 rounded bg-destructive px-1 text-[10px] font-bold text-destructive-foreground align-middle">
-                        UP
-                      </span>
-                    )}
-                    {m.title}
-                  </h3>
-
-                  <div className="mt-2 space-y-1">
-                    <div className="flex items-center justify-between rounded bg-secondary px-2 py-1 text-[10px]">
-                      <span className="font-medium text-foreground">{m.chapter || 'Ch. -'}</span>
-                      <span className="text-muted-foreground">{relTime(m.updatedOn)}</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded bg-secondary px-2 py-1 text-[10px]">
-                      <span className="font-medium text-foreground">Sub Indo</span>
-                      <span className="text-muted-foreground">{m.type}</span>
-                    </div>
-                  </div>
+                  <h3 className="mt-2 line-clamp-2 text-[13px] font-bold leading-tight text-foreground">{m.title}</h3>
+                  <p className="mt-1 truncate text-[10px] text-muted-foreground">{m.chapter || 'Ch. -'}</p>
                 </a>
               ))}
             </div>
@@ -204,6 +189,7 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
         </div>
 
         {/* PAGINATION */}
+        {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -213,18 +199,9 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
           >
             <span className="text-lg leading-none">‹</span>
           </button>
-          {Array.from({ length: totalPages }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={
-                'h-9 min-w-9 rounded-lg px-2 text-sm font-semibold transition ' +
-                (page === i + 1 ? 'bg-foreground text-background' : 'bg-secondary text-foreground/70 hover:bg-muted')
-              }
-            >
-              {i + 1}
-            </button>
-          ))}
+          <span className="text-sm font-medium text-foreground px-2">
+            {page} / {totalPages}
+          </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
@@ -234,6 +211,7 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
             <span className="text-lg leading-none">›</span>
           </button>
         </div>
+        )}
       </div>
     </section>
   )
