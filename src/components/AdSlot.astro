@@ -7,20 +7,27 @@ interface Props {
 }
 
 const { width, height, adKey, class: className } = Astro.props
-const uid = `ad-${adKey}`
+const uid = Math.random().toString(36).slice(2, 10)
 ---
 
-<div class:list={[className]} style={`min-width:${width}px;min-height:${height}px;display:flex;justify-content:center;overflow:hidden;`}>
-  <div id={uid} style={`width:${width}px;height:${height}px;`}></div>
+<div class:list={[className]} style={`display:flex;justify-content:center;`}>
+  <div id={`ad-${uid}`} style={`width:${width}px;height:${height}px;`}></div>
   <script is:inline define:vars={{ adKey, width, height, uid }}>
-    if (!window['_adLoaded_' + adKey]) {
-      window['_adLoaded_' + adKey] = true;
-      atOptions = { 'key': adKey, 'format': 'iframe', 'height': height, 'width': width, 'params': {} };
-      var s = document.createElement('script');
-      s.src = 'https://delvefencescrewdriver.com/' + adKey + '/invoke.js';
-      s.async = true;
-      var c = document.getElementById(uid);
-      if (c) c.appendChild(s);
-    }
+    (function() {
+      var html = '<html><body style="margin:0;overflow:hidden;">' +
+        '<script>window.atOptions={key:"' + adKey + '",format:"iframe",height:' + height + ',width:' + width + ',params:{}};<\/script>' +
+        '<script src="https://delvefencescrewdriver.com/' + adKey + '/invoke.js"><\/script>' +
+        '</body></html>';
+      var iframe = document.createElement('iframe');
+      iframe.width = width;
+      iframe.height = height;
+      iframe.style.border = '0';
+      iframe.style.overflow = 'hidden';
+      iframe.scrolling = 'no';
+      iframe.loading = 'lazy';
+      iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+      var container = document.getElementById('ad-' + uid);
+      if (container) container.appendChild(iframe);
+    })();
   </script>
 </div>
