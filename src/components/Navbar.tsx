@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Menu, X, BookOpen } from 'lucide-react'
 import { Button } from './ui/button'
 import ThemeToggle from './ThemeToggle'
+import SearchBar from './SearchBar'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -78,16 +79,7 @@ export default function Navbar() {
           >
             <ThemeToggle />
           </motion.div>
-          <motion.a
-            href="/search"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-secondary">
-              <Search className="w-5 h-5" />
-            </Button>
-          </motion.a>
+          <SearchBar />
           <motion.a
             href="/admin/login"
             initial={{ opacity: 0, x: 20 }}
