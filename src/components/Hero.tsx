@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
+import AdScript from './AdScript'
 
 type Slide = {
   title: string
@@ -184,17 +185,8 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* AD SLOT GRID */}
-        <div className="mt-10 grid grid-cols-2 border border-hairline dark:border-border">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex h-[100px] items-center justify-center border-b border-r border-hairline bg-surface-soft text-sm font-medium text-muted-foreground dark:border-border dark:bg-secondary dark:text-muted-foreground md:h-[110px] [&:nth-child(2n)]:border-r-0 [&:nth-last-child(-n+2)]:border-b-0"
-            >
-              Slot Iklan
-            </div>
-          ))}
-        </div>
+        {/* AD */}
+        <AdScript className="mt-10" />
       </div>
     </section>
   )
