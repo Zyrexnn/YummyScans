@@ -62,7 +62,6 @@ const GENRES: { name: string; slug: string }[] = [
 
 const FLAG: Record<string, string> = { Manhwa: '🇰🇷', Manga: '🇯🇵', Manhua: '🇨🇳' }
 const FORMATS = ['Manhwa', 'Manga', 'Manhua']
-const STATUSES = ['Ongoing', 'Completed', 'Hiatus']
 
 function shortRel(s: string): string {
   const t = s.toLowerCase()
@@ -194,8 +193,6 @@ export default function SearchExplorer({
   const [sort, setSort] = useState<'latest' | 'az' | 'za'>('latest')
   const [drawer, setDrawer] = useState(false)
   const [genreSearch, setGenreSearch] = useState('')
-  const [inclusion, setInclusion] = useState('Or')
-  const [exclusion, setExclusion] = useState('Or')
 
   const buildHref = (o: { q?: string; type?: string; genre?: string; page?: number }) => {
     const p = new URLSearchParams()
@@ -246,31 +243,8 @@ export default function SearchExplorer({
             )
           })}
         </div>
-        <div className="mt-3 space-y-2">
-          <label className="flex items-center justify-between text-[11px] text-muted-foreground">
-            Inclusion mode
-            <select
-              value={inclusion}
-              onChange={(e) => setInclusion(e.target.value)}
-              className="rounded-md border border-border bg-secondary px-2 py-1 text-[11px] text-foreground"
-            >
-              <option>Or</option>
-            </select>
-          </label>
-          <label className="flex items-center justify-between text-[11px] text-muted-foreground">
-            Exclusion mode
-            <select
-              value={exclusion}
-              onChange={(e) => setExclusion(e.target.value)}
-              className="rounded-md border border-border bg-secondary px-2 py-1 text-[11px] text-foreground"
-            >
-              <option>Or</option>
-            </select>
-          </label>
-        </div>
       </Collapsible>
 
-      {/* ponytail: Format/Type/Status/Author/Artist not all backed by the scrape source — Format/Type navigate; Status/Author/Artist are visual shells pending a real filter API */}
       <Collapsible title="Format">
         <div className="flex flex-wrap gap-1.5">
           {FORMATS.map((f) => {
@@ -289,50 +263,6 @@ export default function SearchExplorer({
             )
           })}
         </div>
-      </Collapsible>
-
-      <Collapsible title="Type">
-        <div className="flex flex-wrap gap-1.5">
-          {FORMATS.map((f) => {
-            const active = (typeFilter || '').toLowerCase() === f.toLowerCase()
-            return (
-              <button
-                key={f}
-                onClick={() => (window.location.href = buildHref({ type: active ? '' : f, page: 1 }))}
-                className={
-                  'rounded-lg px-3 py-1.5 text-[12px] font-medium transition ' +
-                  (active ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground/80 hover:bg-muted')
-                }
-              >
-                {f}
-              </button>
-            )
-          })}
-        </div>
-      </Collapsible>
-
-      <Collapsible title="Status">
-        <div className="flex flex-wrap gap-1.5">
-          {STATUSES.map((s) => (
-            <span key={s} className="cursor-default rounded-lg bg-secondary px-3 py-1.5 text-[12px] font-medium text-foreground/60">
-              {s}
-            </span>
-          ))}
-        </div>
-      </Collapsible>
-
-      <Collapsible title="Author">
-        <input
-          placeholder="Author..."
-          className="h-9 w-full rounded-lg border border-border bg-secondary px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
-        />
-      </Collapsible>
-
-      <Collapsible title="Artist">
-        <input
-          placeholder="Artist..."
-          className="h-9 w-full rounded-lg border border-border bg-secondary px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
-        />
       </Collapsible>
     </div>
   )
