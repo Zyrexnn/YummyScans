@@ -21,8 +21,8 @@ try {
   {/* HERO */}
   <Hero client:load />
 
-  {/* AD: 728x90 desktop / 320x50 mobile */}
-  <section class="py-8 bg-background">
+  {/* AD: Leaderboard 728x90 desktop / 320x50 mobile */}
+  <section class="py-6 bg-background">
     <div class="max-w-[1280px] mx-auto px-6 flex justify-center">
       <AdSlot width={728} height={90} adKey="2d5b42ffd6cb16d65bd3eb553d7e0eec" class="hidden md:block" />
       <AdSlot width={320} height={50} adKey="a675c284043575bba74699224c71581c" class="block md:hidden" />
@@ -32,20 +32,28 @@ try {
   {/* REKOMENDASI */}
   <Rekomendasi client:load manga={latestFeed} />
 
-  {/* AD: 300x250 */}
+  {/* AD GRID: 3x 300x250 */}
   <section class="py-6 bg-background">
-    <div class="max-w-[1280px] mx-auto px-6 flex justify-center">
-      <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
+    <div class="max-w-[1280px] mx-auto px-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
+        <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
+        <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
+        <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
+      </div>
     </div>
   </section>
 
   {/* UPDATE */}
   <UpdateSection client:load manga={latestFeed} />
 
-  {/* AD: 300x250 */}
+  {/* AD GRID: 3x 300x250 */}
   <section class="py-6 bg-background">
-    <div class="max-w-[1280px] mx-auto px-6 flex justify-center">
-      <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
+    <div class="max-w-[1280px] mx-auto px-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
+        <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
+        <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
+        <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
+      </div>
     </div>
   </section>
 
