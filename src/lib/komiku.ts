@@ -60,7 +60,7 @@ async function fetchHTML(url: string, retries = 2): Promise<string> {
 }
 
 function parseChapterNum(slug: string): number {
-  const match = slug.match(/chapter-([\d.]+)/)
+  const match = slug.match(/chapter-([\d.]+)/i) || slug.match(/(\d+(?:\.\d+)?)/)
   return match ? parseFloat(match[1]) : 0
 }
 
