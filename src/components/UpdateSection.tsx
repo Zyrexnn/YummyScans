@@ -47,11 +47,8 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
   const [view, setView] = useState<View>('grid')
   const [page, setPage] = useState(1)
 
-  const items = useMemo(() => {
-    const list = tab === 'Mirror' ? [...manga].reverse() : manga
-    const start = (page - 1) * PER_PAGE
-    return list.slice(start, start + PER_PAGE)
-  }, [manga, tab, page])
+  // ponytail: Project/Mirror categories have no real source yet — show empty until a dedicated feed exists
+  const items = useMemo<LatestManga[]>(() => [], [manga, tab, page])
 
   const totalPages = Math.max(1, Math.ceil(manga.length / PER_PAGE))
 
