@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react'
 import { LayoutGrid, List, Clock } from 'lucide-react'
-import AdScript from './AdScript'
 import type { LatestManga } from '../lib/komiku'
 
 type Tab = 'Project' | 'Mirror'
@@ -29,7 +28,18 @@ function isNew(s: string): boolean {
 }
 
 function AdGrid() {
-  return <AdScript className="mb-8" />
+  return (
+    <div className="grid grid-cols-2 border border-hairline dark:border-border">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex h-[90px] items-center justify-center border-b border-r border-hairline bg-surface-soft text-sm font-medium text-muted-foreground dark:border-border dark:bg-secondary dark:text-muted-foreground md:h-[100px] [&:nth-child(2n)]:border-r-0 [&:nth-last-child(-n+2)]:border-b-0"
+        >
+          Slot Iklan
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
