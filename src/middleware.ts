@@ -11,24 +11,30 @@ export async function onRequest(context: any, next: any) {
   if (!url.pathname.startsWith('/admin')) return next()
   if (url.pathname === '/admin/login') return next()
 
+  if (!SUPABASE_URL || !SUPABASE_KEY) return redirect('/admin/login')
+
   const access = cookies.get('sb-access-token')?.value
   const refresh = cookies.get('sb-refresh-token')?.value
   if (!access || !refresh) return redirect('/admin/login')
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
+  try {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
 
-  const { data } = await supabase.auth.setSession({ access_token: access, refresh_token: refresh })
-  if (!data.user) return redirect('/admin/login')
+    const { data } = await supabase.auth.setSession({ access_token: access, refresh_token: refresh })
+    if (!data.user) return redirect('/admin/login')
 
-  const { data: admin } = await supabase
-    .from('admin_users')
-    .select('id')
-    .eq('id', data.user.id)
-    .single()
+    const { data: admin } = await supabase
+      .from('admin_users')
+      .select('id')
+      .eq('id', data.user.id)
+      .single()
 
-  if (!admin) return redirect('/admin/login')
+    if (!admin) return redirect('/admin/login')
+  } catch {
+    return redirect('/admin/login')
+  }
 
   return next()
 }
