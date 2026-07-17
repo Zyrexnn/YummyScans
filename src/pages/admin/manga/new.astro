@@ -19,6 +19,8 @@ if (Astro.request.method === 'POST') {
     const form = await Astro.request.formData()
     const title = String(form.get('title') || '')
     const status = String(form.get('status') || 'ongoing')
+    const format = String(form.get('format') || 'manga')
+    const type = String(form.get('type') || 'project')
     const author = String(form.get('author') || '')
     const synopsis = String(form.get('synopsis') || '')
     const genreIds = form.getAll('genres') as string[]
@@ -35,6 +37,8 @@ if (Astro.request.method === 'POST') {
         slug,
         cover_url: coverUrl,
         status,
+        format,
+        type,
         author,
         synopsis,
         genres: genreIds,
@@ -47,9 +51,9 @@ if (Astro.request.method === 'POST') {
 }
 ---
 
-<AdminLayout active="Manga" title="Tambah Manga">
+<AdminLayout active="Komik" title="Tambah Komik">
   <div class="mx-auto max-w-2xl px-6 py-8">
-    <h1 class="mb-6 text-3xl font-bold text-black">Tambah Manga</h1>
+    <h1 class="mb-6 text-3xl font-bold text-black">Tambah Komik</h1>
     {error && <div class="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
     <MangaForm genres={genres} />
   </div>

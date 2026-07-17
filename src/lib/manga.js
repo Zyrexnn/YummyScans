@@ -1,16 +1,22 @@
 import { supabase } from '../db/supabase'
 
 const FORMATS = ['manga', 'manhwa', 'manhua']
+const TYPES = ['project', 'mirror']
 
 function normalizeFormat(value) {
   const f = String(value || '').trim().toLowerCase()
   return FORMATS.includes(f) ? f : 'manga'
 }
 
+function normalizeType(value) {
+  const t = String(value || '').trim().toLowerCase()
+  return TYPES.includes(t) ? t : 'project'
+}
+
 /**
  * Get manga list with pagination and filters
  */
-export async function getMangaList({ page = 1, limit = 20, status, genre, source } = {}) {
+export async function getMangaList({ page = 1, limit = 20, status, genre, source, type } = {}) {
   let query = supabase
     .from('manga')
     .select(`
@@ -22,6 +28,7 @@ export async function getMangaList({ page = 1, limit = 20, status, genre, source
 
   if (status) query = query.eq('status', status)
   if (source) query = query.eq('source', source)
+  if (type) query = query.eq('type', type)
   if (genre) {
     query = query.eq('manga_genres.genres.slug', genre)
   }
@@ -70,8 +77,9 @@ export async function getMangaById(id) {
  * Create new manga
  */
 export async function createManga(mangaData) {
-  const { genres, type, ...manga } = mangaData
-  if (type && !manga.format) manga.format = normalizeFormat(type)
+  const { genres, ...manga } = mangaData
+  if (manga.format !== undefined) manga.format = normalizeFormat(manga.format)
+  if (manga.type !== undefined) manga.type = normalizeType(manga.type)
 
   const { data, error } = await supabase
     .from('manga')
@@ -102,8 +110,9 @@ export async function createManga(mangaData) {
  * Update manga
  */
 export async function updateManga(id, mangaData) {
-  const { genres, type, ...manga } = mangaData
-  if (type && !manga.format) manga.format = normalizeFormat(type)
+  const { genres, ...manga } = mangaData
+  if (manga.format !== undefined) manga.format = normalizeFormat(manga.format)
+  if (manga.type !== undefined) manga.type = normalizeType(manga.type)
 
   const { data, error } = await supabase
     .from('manga')

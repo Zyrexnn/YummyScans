@@ -34,7 +34,7 @@ if (Astro.request.method === 'POST' && chapter) {
 }
 ---
 
-<AdminLayout active="Manga" title="Edit Chapter">
+<AdminLayout active="Komik" title="Edit Chapter">
   <div class="mx-auto max-w-2xl px-6 py-8">
     <a href={`/admin/manga/${slug}/chapters`} class="text-xs text-black/50 hover:underline">← Chapter</a>
     <h1 class="mb-6 text-2xl font-bold text-black">Edit Chapter {chapter?.chapter_number}</h1>
