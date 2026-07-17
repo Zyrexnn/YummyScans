@@ -1,16 +1,22 @@
-import { supabase } from '../db/supabase'
+import { supabase as anon } from '../db/supabase'
 
 const FORMATS = ['manga', 'manhwa', 'manhua']
+const TYPES = ['project', 'mirror']
 
 function normalizeFormat(value) {
   const f = String(value || '').trim().toLowerCase()
   return FORMATS.includes(f) ? f : 'manga'
 }
 
+function normalizeType(value) {
+  const t = String(value || '').trim().toLowerCase()
+  return TYPES.includes(t) ? t : 'project'
+}
+
 /**
  * Get manga list with pagination and filters
  */
-export async function getMangaList({ page = 1, limit = 20, status, genre, source } = {}) {
+export async function getMangaList({ page = 1, limit = 20, status, genre, source, type } = {}, supabase = anon) {
   let query = supabase
     .from('manga')
     .select(`
@@ -22,6 +28,7 @@ export async function getMangaList({ page = 1, limit = 20, status, genre, source
 
   if (status) query = query.eq('status', status)
   if (source) query = query.eq('source', source)
+  if (type) query = query.eq('type', type)
   if (genre) {
     query = query.eq('manga_genres.genres.slug', genre)
   }
@@ -35,7 +42,7 @@ export async function getMangaList({ page = 1, limit = 20, status, genre, source
 /**
  * Get manga by slug
  */
-export async function getMangaBySlug(slug) {
+export async function getMangaBySlug(slug, supabase = anon) {
   const { data, error } = await supabase
     .from('manga')
     .select(`
@@ -52,7 +59,7 @@ export async function getMangaBySlug(slug) {
 /**
  * Get manga by ID
  */
-export async function getMangaById(id) {
+export async function getMangaById(id, supabase = anon) {
   const { data, error } = await supabase
     .from('manga')
     .select(`
@@ -69,9 +76,11 @@ export async function getMangaById(id) {
 /**
  * Create new manga
  */
-export async function createManga(mangaData) {
-  const { genres, type, ...manga } = mangaData
-  if (type && !manga.format) manga.format = normalizeFormat(type)
+export async function createManga(client, mangaData) {
+  const supabase = client || anon
+  const { genres, ...manga } = mangaData
+  if (manga.format !== undefined) manga.format = normalizeFormat(manga.format)
+  if (manga.type !== undefined) manga.type = normalizeType(manga.type)
 
   const { data, error } = await supabase
     .from('manga')
@@ -101,9 +110,11 @@ export async function createManga(mangaData) {
 /**
  * Update manga
  */
-export async function updateManga(id, mangaData) {
-  const { genres, type, ...manga } = mangaData
-  if (type && !manga.format) manga.format = normalizeFormat(type)
+export async function updateManga(client, id, mangaData) {
+  const supabase = client || anon
+  const { genres, ...manga } = mangaData
+  if (manga.format !== undefined) manga.format = normalizeFormat(manga.format)
+  if (manga.type !== undefined) manga.type = normalizeType(manga.type)
 
   const { data, error } = await supabase
     .from('manga')
@@ -143,7 +154,8 @@ export async function updateManga(id, mangaData) {
 /**
  * Delete manga
  */
-export async function deleteManga(id) {
+export async function deleteManga(client, id) {
+  const supabase = client || anon
   const { error } = await supabase
     .from('manga')
     .delete()
@@ -155,7 +167,7 @@ export async function deleteManga(id) {
 /**
  * Get popular manga (most chapters)
  */
-export async function getPopularManga(limit = 10) {
+export async function getPopularManga(limit = 10, supabase = anon) {
   const { data, error } = await supabase
     .from('manga')
     .select(`
@@ -172,7 +184,7 @@ export async function getPopularManga(limit = 10) {
 /**
  * Get latest manga
  */
-export async function getLatestManga(limit = 10) {
+export async function getLatestManga(limit = 10, supabase = anon) {
   const { data, error } = await supabase
     .from('manga')
     .select(`
@@ -189,7 +201,7 @@ export async function getLatestManga(limit = 10) {
 /**
  * Search manga by title
  */
-export async function searchManga(query, limit = 20) {
+export async function searchManga(query, limit = 20, supabase = anon) {
   const { data, error } = await supabase
     .from('manga')
     .select(`
@@ -201,6 +213,23 @@ export async function searchManga(query, limit = 20) {
 
   if (error) throw error
   return data
+}
+
+const FORMAT_LABEL = { manga: 'Manga', manhwa: 'Manhwa', manhua: 'Manhua' }
+
+/**
+ * Map a Supabase manga row to the LatestManga shape used by home/search UI.
+ * `type` here is the format label (drives the flag), matching the scraper shape.
+ */
+export function toLatestShape(m) {
+  return {
+    title: m.title,
+    coverUrl: m.cover_url,
+    type: FORMAT_LABEL[m.format] || 'Manga',
+    slug: m.slug,
+    chapter: '',
+    updatedOn: m.updated_at || m.created_at || '',
+  }
 }
 
 /**

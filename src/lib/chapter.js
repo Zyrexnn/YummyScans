@@ -1,9 +1,9 @@
-import { supabase } from '../db/supabase'
+import { supabase as anon } from '../db/supabase'
 
 /**
  * Get chapters by manga ID
  */
-export async function getChaptersByMangaId(mangaId) {
+export async function getChaptersByMangaId(mangaId, supabase = anon) {
   const { data, error } = await supabase
     .from('chapters')
     .select('*')
@@ -17,7 +17,7 @@ export async function getChaptersByMangaId(mangaId) {
 /**
  * Get chapter by ID with pages
  */
-export async function getChapterById(chapterId) {
+export async function getChapterById(chapterId, supabase = anon) {
   const { data, error } = await supabase
     .from('chapters')
     .select(`
@@ -40,7 +40,8 @@ export async function getChapterById(chapterId) {
 /**
  * Create new chapter
  */
-export async function createChapter(mangaId, chapterData) {
+export async function createChapter(client, mangaId, chapterData) {
+  const supabase = client || anon
   const { pages, ...chapter } = chapterData
 
   const { data, error } = await supabase
@@ -77,7 +78,8 @@ export async function createChapter(mangaId, chapterData) {
 /**
  * Update chapter
  */
-export async function updateChapter(chapterId, chapterData) {
+export async function updateChapter(client, chapterId, chapterData) {
+  const supabase = client || anon
   const { pages, ...chapter } = chapterData
 
   const { data, error } = await supabase
@@ -126,7 +128,8 @@ export async function updateChapter(chapterId, chapterData) {
 /**
  * Delete chapter
  */
-export async function deleteChapter(chapterId) {
+export async function deleteChapter(client, chapterId) {
+  const supabase = client || anon
   const { error } = await supabase
     .from('chapters')
     .delete()
@@ -138,7 +141,7 @@ export async function deleteChapter(chapterId) {
 /**
  * Get latest chapters across all manga
  */
-export async function getLatestChapters(limit = 10) {
+export async function getLatestChapters(limit = 10, supabase = anon) {
   const { data, error } = await supabase
     .from('chapters')
     .select(`
@@ -155,7 +158,7 @@ export async function getLatestChapters(limit = 10) {
 /**
  * Get next/previous chapter for navigation
  */
-export async function getAdjacentChapters(mangaId, currentChapterNumber) {
+export async function getAdjacentChapters(mangaId, currentChapterNumber, supabase = anon) {
   const [prev, next] = await Promise.all([
     supabase
       .from('chapters')

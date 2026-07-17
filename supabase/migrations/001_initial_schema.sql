@@ -237,7 +237,7 @@ END $$;
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admin read admin_users') THEN
     CREATE POLICY "Admin read admin_users" ON admin_users FOR SELECT
-      USING (EXISTS (SELECT 1 FROM admin_users WHERE id = auth.uid()));
+      USING (id = auth.uid());
   END IF;
 END $$;
 

@@ -2,6 +2,7 @@
 import AdminLayout from '../../../../../layouts/AdminLayout.astro'
 import { getMangaBySlug } from '../../../../../lib/manga'
 import { getChaptersByMangaId, deleteChapter } from '../../../../../lib/chapter'
+import { getAdminClient } from '../../../../../lib/supabase-server'
 
 const slug = Astro.params.mangaId
 let manga: any = null
@@ -13,7 +14,7 @@ if (Astro.request.method === 'POST') {
     const form = await Astro.request.formData()
     const id = form.get('id')
     if (id) {
-      await deleteChapter(id)
+      await deleteChapter(await getAdminClient(Astro.cookies), id)
       return Astro.redirect(`/admin/manga/${slug}/chapters`)
     }
   } catch (e: any) {
@@ -29,7 +30,7 @@ try {
 }
 ---
 
-<AdminLayout active="Manga" title="Chapter">
+<AdminLayout active="Komik" title="Chapter">
   <div class="mx-auto max-w-3xl px-6 py-8">
     <div class="mb-6 flex items-center justify-between">
       <div>

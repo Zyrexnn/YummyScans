@@ -1,9 +1,9 @@
-import { supabase } from '../db/supabase'
+import { supabase as anon } from '../db/supabase'
 
 /**
  * Get all genres
  */
-export async function getGenres() {
+export async function getGenres(supabase = anon) {
   const { data, error } = await supabase
     .from('genres')
     .select('*')
@@ -16,7 +16,7 @@ export async function getGenres() {
 /**
  * Get genre by slug
  */
-export async function getGenreBySlug(slug) {
+export async function getGenreBySlug(slug, supabase = anon) {
   const { data, error } = await supabase
     .from('genres')
     .select('*')
@@ -30,7 +30,8 @@ export async function getGenreBySlug(slug) {
 /**
  * Create new genre
  */
-export async function createGenre(genreData) {
+export async function createGenre(client, genreData) {
+  const supabase = client || anon
   const { data, error } = await supabase
     .from('genres')
     .insert(genreData)
@@ -44,7 +45,8 @@ export async function createGenre(genreData) {
 /**
  * Update genre
  */
-export async function updateGenre(id, genreData) {
+export async function updateGenre(client, id, genreData) {
+  const supabase = client || anon
   const { data, error } = await supabase
     .from('genres')
     .update(genreData)
@@ -59,7 +61,8 @@ export async function updateGenre(id, genreData) {
 /**
  * Delete genre
  */
-export async function deleteGenre(id) {
+export async function deleteGenre(client, id) {
+  const supabase = client || anon
   const { error } = await supabase
     .from('genres')
     .delete()
@@ -71,7 +74,7 @@ export async function deleteGenre(id) {
 /**
  * Get manga count per genre
  */
-export async function getGenreCounts() {
+export async function getGenreCounts(supabase = anon) {
   const { data, error } = await supabase
     .from('genres')
     .select(`

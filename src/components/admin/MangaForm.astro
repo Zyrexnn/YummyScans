@@ -43,16 +43,41 @@ const selected: string[] = values.genres || []
     </div>
   </div>
 
-  <div>
-    <label class="mb-1.5 block text-sm font-semibold text-black">Status</label>
-    <select
-      name="status"
-      class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
-    >
-      <option value="ongoing" selected={values.status === 'ongoing'}>Ongoing</option>
-      <option value="completed" selected={values.status === 'completed'}>Completed</option>
-      <option value="hiatus" selected={values.status === 'hiatus'}>Hiatus</option>
-    </select>
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div>
+      <label class="mb-1.5 block text-sm font-semibold text-black">Status</label>
+      <select
+        name="status"
+        class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+      >
+        <option value="ongoing" selected={values.status === 'ongoing'}>Ongoing</option>
+        <option value="completed" selected={values.status === 'completed'}>Completed</option>
+        <option value="hiatus" selected={values.status === 'hiatus'}>Hiatus</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-sm font-semibold text-black">Format</label>
+      <select
+        name="format"
+        class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+      >
+        <option value="manga" selected={values.format === 'manga'}>Manga</option>
+        <option value="manhwa" selected={values.format === 'manhwa'}>Manhwa</option>
+        <option value="manhua" selected={values.format === 'manhua'}>Manhua</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-sm font-semibold text-black">Type</label>
+      <select
+        name="type"
+        class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+      >
+        <option value="project" selected={values.type !== 'mirror'}>Project</option>
+        <option value="mirror" selected={values.type === 'mirror'}>Mirror</option>
+      </select>
+    </div>
   </div>
 
   <div>

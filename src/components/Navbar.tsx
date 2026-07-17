@@ -92,11 +92,6 @@ export default function Navbar() {
                 <Search className="w-5 h-5" />
               </Button>
             </a>
-            <a href="/admin/login">
-              <Button className="rounded-lg text-sm font-medium px-5 h-9">
-                Masuk
-              </Button>
-            </a>
           </div>
 
           {/* Mobile Actions */}
@@ -198,10 +193,8 @@ export default function Navbar() {
 
               {/* Drawer Footer */}
               <div className="shrink-0 border-t border-border p-4">
-                <a href="/admin/login" onClick={() => setIsOpen(false)}>
-                  <Button className="w-full rounded-lg h-10 text-sm font-medium">
-                    Masuk
-                  </Button>
+                <a href="/admin/login" onClick={() => setIsOpen(false)} className="text-sm font-medium text-foreground/70 hover:text-foreground">
+                  Admin Login
                 </a>
               </div>
             </motion.div>

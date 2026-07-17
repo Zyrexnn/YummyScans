@@ -6,14 +6,23 @@ import Hero from '../components/Hero'
 import Rekomendasi from '../components/Rekomendasi'
 import UpdateSection from '../components/UpdateSection'
 import { fetchLatest } from '../lib/komiku'
+import { getMangaList, toLatestShape } from '../lib/manga'
 
 let latestFeed: any[] = []
+let projectFeed: any[] = []
 
 try {
   const pages = await Promise.all([fetchLatest(1), fetchLatest(2), fetchLatest(3), fetchLatest(4)])
   latestFeed = pages.flat()
 } catch (error: any) {
-  console.error('[Home] Failed to load manga:', error.message)
+  console.error('[Home] Failed to load mirror manga:', error.message)
+}
+
+try {
+  const { manga } = await getMangaList({ type: 'project', limit: 48 })
+  projectFeed = (manga || []).map(toLatestShape)
+} catch (error: any) {
+  console.error('[Home] Failed to load project manga:', error.message)
 }
 ---
 
@@ -44,7 +53,7 @@ try {
   </section>
 
   {/* UPDATE */}
-  <UpdateSection client:load manga={latestFeed} />
+  <UpdateSection client:load project={projectFeed} mirror={latestFeed} />
 
   {/* AD: Medium Rectangle 300x250 */}
   <section class="py-6 bg-background">

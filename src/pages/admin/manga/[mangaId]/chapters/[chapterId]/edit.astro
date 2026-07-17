@@ -3,6 +3,7 @@ import AdminLayout from '../../../../../../layouts/AdminLayout.astro'
 import { getMangaBySlug } from '../../../../../../lib/manga'
 import { getChapterById, updateChapter } from '../../../../../../lib/chapter'
 import { uploadChapterPages } from '../../../../../../lib/storage'
+import { getAdminClient } from '../../../../../../lib/supabase-server'
 
 const slug = Astro.params.mangaId
 const chapterId = Astro.params.chapterId
@@ -21,12 +22,13 @@ if (Astro.request.method === 'POST' && chapter) {
     const form = await Astro.request.formData()
     const title = String(form.get('title') || '')
     const files = form.getAll('pages') as File[]
+    const sb = await getAdminClient(Astro.cookies)
     const payload: any = { title }
     if (files.length > 0 && files[0].size > 0) {
-      const pages = await uploadChapterPages(manga.id, `ch${chapter.chapter_number}`, files)
+      const pages = await uploadChapterPages(sb, manga.id, `ch${chapter.chapter_number}`, files)
       payload.pages = pages
     }
-    await updateChapter(chapterId, payload)
+    await updateChapter(sb, chapterId, payload)
     return Astro.redirect(`/admin/manga/${slug}/chapters`)
   } catch (e: any) {
     error = e.message || 'Gagal menyimpan'
@@ -34,7 +36,7 @@ if (Astro.request.method === 'POST' && chapter) {
 }
 ---
 
-<AdminLayout active="Manga" title="Edit Chapter">
+<AdminLayout active="Komik" title="Edit Chapter">
   <div class="mx-auto max-w-2xl px-6 py-8">
     <a href={`/admin/manga/${slug}/chapters`} class="text-xs text-black/50 hover:underline">← Chapter</a>
     <h1 class="mb-6 text-2xl font-bold text-black">Edit Chapter {chapter?.chapter_number}</h1>

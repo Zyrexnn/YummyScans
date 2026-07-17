@@ -2,10 +2,13 @@
 import EditorialLayout from '../layouts/EditorialLayout.astro'
 import SearchExplorer from '../components/SearchExplorer'
 import { fetchSearch, fetchGenreManga, fetchByType, fetchByGenreAndType } from '../lib/komiku'
+import { getMangaList, searchManga, toLatestShape } from '../lib/manga'
 
 const query = Astro.url.searchParams.get('q') || ''
 const typeFilter = Astro.url.searchParams.get('type') || ''
 const genreFilter = Astro.url.searchParams.get('genre') || ''
+const srcFilter = Astro.url.searchParams.get('src') || ''
+const statusFilter = Astro.url.searchParams.get('status') || ''
 const page = parseInt(Astro.url.searchParams.get('page') || '1', 10)
 
 let results: any[] = []
@@ -21,7 +24,25 @@ const mapFn = (m: any) => ({
   updatedOn: m.updatedOn || '',
 })
 
-if (genreFilter) {
+const PROJECT_PER_PAGE = 24
+
+if (srcFilter === 'project') {
+  try {
+    const { manga } = await getMangaList({ type: 'project', genre: genreFilter || undefined, status: statusFilter || undefined, page, limit: PROJECT_PER_PAGE })
+    let rows = manga || []
+    if (query) {
+      const q = query.toLowerCase()
+      rows = rows.filter((m: any) => m.title.toLowerCase().includes(q))
+    }
+    if (typeFilter) {
+      rows = rows.filter((m: any) => (m.format || '').toLowerCase() === typeFilter.toLowerCase())
+    }
+    results = rows.map(toLatestShape)
+    hasMore = (manga || []).length === PROJECT_PER_PAGE
+  } catch (e: any) {
+    error = e.message || 'Gagal memuat project'
+  }
+} else if (genreFilter) {
   try {
     if (!typeFilter) {
       const [currentPage, nextPage] = await Promise.all([fetchGenreManga(genreFilter, page), fetchGenreManga(genreFilter, page + 1)])
@@ -56,5 +77,5 @@ if (genreFilter) {
 ---
 
 <EditorialLayout title={query ? `Cari: ${query} - YummyScans` : 'Cari Manga - YummyScans'} description="Cari manga, manhwa, dan manhua Sub Indo">
-  <SearchExplorer client:load manga={results} query={query} typeFilter={typeFilter} genreFilter={genreFilter} page={page} hasMore={hasMore} />
+  <SearchExplorer client:load manga={results} query={query} typeFilter={typeFilter} genreFilter={genreFilter} srcFilter={srcFilter} statusFilter={statusFilter} page={page} hasMore={hasMore} />
 </EditorialLayout>
