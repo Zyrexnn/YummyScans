@@ -8,6 +8,7 @@ const query = Astro.url.searchParams.get('q') || ''
 const typeFilter = Astro.url.searchParams.get('type') || ''
 const genreFilter = Astro.url.searchParams.get('genre') || ''
 const srcFilter = Astro.url.searchParams.get('src') || ''
+const statusFilter = Astro.url.searchParams.get('status') || ''
 const page = parseInt(Astro.url.searchParams.get('page') || '1', 10)
 
 let results: any[] = []
@@ -27,7 +28,7 @@ const PROJECT_PER_PAGE = 24
 
 if (srcFilter === 'project') {
   try {
-    const { manga } = await getMangaList({ type: 'project', genre: genreFilter || undefined, page, limit: PROJECT_PER_PAGE })
+    const { manga } = await getMangaList({ type: 'project', genre: genreFilter || undefined, status: statusFilter || undefined, page, limit: PROJECT_PER_PAGE })
     let rows = manga || []
     if (query) {
       const q = query.toLowerCase()
@@ -76,5 +77,5 @@ if (srcFilter === 'project') {
 ---
 
 <EditorialLayout title={query ? `Cari: ${query} - YummyScans` : 'Cari Manga - YummyScans'} description="Cari manga, manhwa, dan manhua Sub Indo">
-  <SearchExplorer client:load manga={results} query={query} typeFilter={typeFilter} genreFilter={genreFilter} srcFilter={srcFilter} page={page} hasMore={hasMore} />
+  <SearchExplorer client:load manga={results} query={query} typeFilter={typeFilter} genreFilter={genreFilter} srcFilter={srcFilter} statusFilter={statusFilter} page={page} hasMore={hasMore} />
 </EditorialLayout>
