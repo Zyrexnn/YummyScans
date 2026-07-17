@@ -22,13 +22,15 @@ export async function onRequest(context: any, next: any) {
       auth: { autoRefreshToken: false, persistSession: false },
     })
 
-    const { data } = await supabase.auth.setSession({ access_token: access, refresh_token: refresh })
-    if (!data.user) return redirect('/admin/login')
+    await supabase.auth.setSession({ access_token: access, refresh_token: refresh })
+
+    const { data: userData, error: userError } = await supabase.auth.getUser(access)
+    if (userError || !userData.user) return redirect('/admin/login')
 
     const { data: admin } = await supabase
       .from('admin_users')
       .select('id')
-      .eq('id', data.user.id)
+      .eq('id', userData.user.id)
       .single()
 
     if (!admin) return redirect('/admin/login')
