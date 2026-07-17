@@ -8,12 +8,12 @@ const links = [
 ]
 ---
 
-<aside class="w-60 flex-shrink-0 border-r border-black/10 bg-white">
+<aside class="flex w-60 flex-shrink-0 flex-col border-r border-black/10 bg-white">
   <div class="flex h-16 items-center gap-2 border-b border-black/10 px-5">
     <div class="h-8 w-8 rounded-full bg-black"></div>
     <span class="text-lg font-bold tracking-tight text-black">YummyScans</span>
   </div>
-  <nav class="flex flex-col gap-1 p-3">
+  <nav class="flex flex-1 flex-col gap-1 p-3">
     {links.map((l) => (
       <a
         href={l.href}
@@ -31,4 +31,15 @@ const links = [
       </a>
     ))}
   </nav>
+  <div class="border-t border-black/10 p-3">
+    <a
+      href="/admin/login?logout=1"
+      class="flex items-center gap-3 rounded-pill px-4 py-2.5 text-sm font-medium text-black/70 transition hover:bg-red-50 hover:text-red-600"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3m0 0 4-4m-4 4 4 4m6-11h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4" />
+      </svg>
+      Logout
+    </a>
+  </div>
 </aside>
