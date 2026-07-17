@@ -62,6 +62,10 @@ const GENRES: { name: string; slug: string }[] = [
 
 const FLAG: Record<string, string> = { Manhwa: '🇰🇷', Manga: '🇯🇵', Manhua: '🇨🇳' }
 const FORMATS = ['Manhwa', 'Manga', 'Manhua']
+const TYPES: { label: string; value: string }[] = [
+  { label: 'Project', value: 'project' },
+  { label: 'Mirror', value: 'mirror' },
+]
 
 function shortRel(s: string): string {
   const t = s.toLowerCase()
@@ -179,6 +183,7 @@ export default function SearchExplorer({
   query,
   typeFilter,
   genreFilter,
+  srcFilter,
   page,
   hasMore,
 }: {
@@ -186,6 +191,7 @@ export default function SearchExplorer({
   query: string
   typeFilter: string
   genreFilter: string
+  srcFilter: string
   page: number
   hasMore: boolean
 }) {
@@ -194,13 +200,15 @@ export default function SearchExplorer({
   const [drawer, setDrawer] = useState(false)
   const [genreSearch, setGenreSearch] = useState('')
 
-  const buildHref = (o: { q?: string; type?: string; genre?: string; page?: number }) => {
+  const buildHref = (o: { q?: string; type?: string; genre?: string; src?: string; page?: number }) => {
     const p = new URLSearchParams()
     p.set('q', o.q ?? query ?? '')
     const t = o.type !== undefined ? o.type : typeFilter
     if (t) p.set('type', t)
     const g = o.genre !== undefined ? o.genre : genreFilter
     if (g) p.set('genre', g)
+    const sc = o.src !== undefined ? o.src : srcFilter
+    if (sc) p.set('src', sc)
     if (o.page && o.page > 1) p.set('page', String(o.page))
     const s = p.toString()
     return '/search' + (s ? '?' + s : '')
@@ -216,6 +224,26 @@ export default function SearchExplorer({
 
   const Sidebar = (
     <div className="flex h-full flex-col">
+      <Collapsible title="Tipe" defaultOpen>
+        <div className="flex flex-wrap gap-1.5">
+          {TYPES.map((t) => {
+            const active = (srcFilter || '') === t.value
+            return (
+              <button
+                key={t.value}
+                onClick={() => (window.location.href = buildHref({ src: active ? '' : t.value, page: 1 }))}
+                className={
+                  'rounded-lg px-3 py-1.5 text-[12px] font-medium transition ' +
+                  (active ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground/80 hover:bg-muted')
+                }
+              >
+                {t.label}
+              </button>
+            )
+          })}
+        </div>
+      </Collapsible>
+
       <Collapsible title="Genre" defaultOpen>
         <div className="relative mb-3">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -295,6 +323,7 @@ export default function SearchExplorer({
               <form action="/search" method="get" className="relative flex-1">
                 {typeFilter && <input type="hidden" name="type" value={typeFilter} />}
                 {genreFilter && <input type="hidden" name="genre" value={genreFilter} />}
+                {srcFilter && <input type="hidden" name="src" value={srcFilter} />}
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"

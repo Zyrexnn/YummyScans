@@ -215,6 +215,23 @@ export async function searchManga(query, limit = 20, supabase = anon) {
   return data
 }
 
+const FORMAT_LABEL = { manga: 'Manga', manhwa: 'Manhwa', manhua: 'Manhua' }
+
+/**
+ * Map a Supabase manga row to the LatestManga shape used by home/search UI.
+ * `type` here is the format label (drives the flag), matching the scraper shape.
+ */
+export function toLatestShape(m) {
+  return {
+    title: m.title,
+    coverUrl: m.cover_url,
+    type: FORMAT_LABEL[m.format] || 'Manga',
+    slug: m.slug,
+    chapter: '',
+    updatedOn: m.updated_at || m.created_at || '',
+  }
+}
+
 /**
  * Generate slug from title
  */

@@ -27,17 +27,19 @@ function isNew(s: string): boolean {
   return t.includes('menit') || t.includes('jam') || /^1\s*hari/.test(t)
 }
 
-export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
+export default function UpdateSection({ project = [], mirror = [] }: { project?: LatestManga[]; mirror?: LatestManga[] }) {
   const [tab, setTab] = useState<Tab>('Project')
   const [view, setView] = useState<View>('grid')
   const [page, setPage] = useState(1)
 
+  const source = tab === 'Project' ? project : mirror
+
   const items = useMemo<LatestManga[]>(() => {
     const start = (page - 1) * PER_PAGE
-    return manga.slice(start, start + PER_PAGE)
-  }, [manga, page])
+    return source.slice(start, start + PER_PAGE)
+  }, [source, page])
 
-  const totalPages = Math.max(1, Math.ceil(manga.length / PER_PAGE))
+  const totalPages = Math.max(1, Math.ceil(source.length / PER_PAGE))
 
   return (
     <section className="bg-background transition-theme">
@@ -160,7 +162,9 @@ export default function UpdateSection({ manga }: { manga: LatestManga[] }) {
             </div>
           )
         ) : (
-          <p className="py-10 text-sm text-muted-foreground">Belum ada update.</p>
+          <p className="py-10 text-sm text-muted-foreground">
+            {tab === 'Project' ? 'Belum ada komik project.' : 'Belum ada update mirror.'}
+          </p>
         )}
 
         {/* PAGINATION */}
