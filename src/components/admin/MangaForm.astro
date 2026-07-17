@@ -43,7 +43,7 @@ const selected: string[] = values.genres || []
     </div>
   </div>
 
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
     <div>
       <label class="mb-1.5 block text-sm font-semibold text-black">Status</label>
       <select
@@ -67,17 +67,17 @@ const selected: string[] = values.genres || []
         <option value="manhua" selected={values.format === 'manhua'}>Manhua</option>
       </select>
     </div>
-  </div>
 
-  <div>
-    <label class="mb-1.5 block text-sm font-semibold text-black">Type</label>
-    <select
-      name="type"
-      class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
-    >
-      <option value="project" selected={values.type !== 'mirror'}>Project</option>
-      <option value="mirror" selected={values.type === 'mirror'}>Mirror</option>
-    </select>
+    <div>
+      <label class="mb-1.5 block text-sm font-semibold text-black">Type</label>
+      <select
+        name="type"
+        class="w-full rounded-xl border border-black/15 px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+      >
+        <option value="project" selected={values.type !== 'mirror'}>Project</option>
+        <option value="mirror" selected={values.type === 'mirror'}>Mirror</option>
+      </select>
+    </div>
   </div>
 
   <div>
