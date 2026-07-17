@@ -3,6 +3,7 @@ import AdminLayout from '../../../../../layouts/AdminLayout.astro'
 import { getMangaBySlug } from '../../../../../lib/manga'
 import { createChapter } from '../../../../../lib/chapter'
 import { uploadChapterPages } from '../../../../../lib/storage'
+import { getAdminClient } from '../../../../../lib/supabase-server'
 
 const slug = Astro.params.mangaId
 let manga: any = null
@@ -24,8 +25,9 @@ if (Astro.request.method === 'POST' && manga) {
     if (!chapterNumber || files.length === 0) {
       error = 'Nomor chapter dan minimal 1 halaman wajib diisi.'
     } else {
-      const pages = await uploadChapterPages(manga.id, `ch${chapterNumber}`, files)
-      await createChapter(manga.id, { chapter_number: chapterNumber, title, pages })
+      const sb = await getAdminClient(Astro.cookies)
+      const pages = await uploadChapterPages(sb, manga.id, `ch${chapterNumber}`, files)
+      await createChapter(sb, manga.id, { chapter_number: chapterNumber, title, pages })
       return Astro.redirect(`/admin/manga/${slug}/chapters`)
     }
   } catch (e: any) {

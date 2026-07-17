@@ -4,6 +4,7 @@ import MangaForm from '../../../../components/admin/MangaForm.astro'
 import { getGenres } from '../../../../lib/genres'
 import { getMangaBySlug, updateManga } from '../../../../lib/manga'
 import { uploadCover } from '../../../../lib/storage'
+import { getAdminClient } from '../../../../lib/supabase-server'
 
 const slug = Astro.params.mangaId
 let manga: any = null
@@ -41,10 +42,11 @@ if (Astro.request.method === 'POST' && manga) {
     const genreIds = form.getAll('genres') as string[]
     const cover = form.get('cover') as File | null
 
+    const sb = await getAdminClient(Astro.cookies)
     const payload: any = { title, status, format, type, author, synopsis, genres: genreIds }
-    if (cover && cover.size > 0) payload.cover_url = await uploadCover(manga.slug, cover)
+    if (cover && cover.size > 0) payload.cover_url = await uploadCover(sb, manga.slug, cover)
 
-    await updateManga(manga.id, payload)
+    await updateManga(sb, manga.id, payload)
     return Astro.redirect('/admin/manga')
   } catch (e: any) {
     error = e.message || 'Gagal menyimpan'

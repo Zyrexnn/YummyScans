@@ -2,6 +2,7 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro'
 import { getMangaList, deleteManga } from '../../../lib/manga'
 import { supabase } from '../../../db/supabase'
+import { getAdminClient } from '../../../lib/supabase-server'
 
 let manga: any[] = []
 let total = 0
@@ -16,7 +17,7 @@ if (Astro.request.method === 'POST') {
   const id = form.get('id')
   if (id) {
     try {
-      await deleteManga(id)
+      await deleteManga(await getAdminClient(Astro.cookies), id)
       notice = 'Komik berhasil dihapus.'
     } catch (e: any) {
       error = e.message || 'Gagal menghapus'
@@ -91,6 +92,10 @@ const statusStyle: Record<string, string> = {
               <td class="px-4 py-3 text-sm text-black/70">{m.chapterCount}</td>
               <td class="px-4 py-3">
                 <div class="flex justify-end gap-2">
+                  <a href={`/admin/manga/${m.slug}/chapters`} class="flex h-9 items-center justify-center gap-1.5 rounded-full border border-black/15 px-3 text-xs font-medium text-black transition hover:bg-black/5" aria-label="Chapter">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10" /></svg>
+                    Chapter
+                  </a>
                   <a href={`/admin/manga/${m.slug}/edit`} class="flex h-9 w-9 items-center justify-center rounded-full border border-black/15 text-black transition hover:bg-black/5" aria-label="Edit">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 20h4L18.5 9.5a2.12 2.12 0 0 0-3-3L5 17v3z" /></svg>
                   </a>

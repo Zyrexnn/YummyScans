@@ -4,6 +4,7 @@ import MangaForm from '../../../components/admin/MangaForm.astro'
 import { getGenres } from '../../../lib/genres'
 import { createManga, generateSlug } from '../../../lib/manga'
 import { uploadCover } from '../../../lib/storage'
+import { getAdminClient } from '../../../lib/supabase-server'
 
 let genres: any[] = []
 let error: string | null = null
@@ -30,9 +31,10 @@ if (Astro.request.method === 'POST') {
     if (!cover || cover.size === 0) {
       error = 'Cover image wajib diisi.'
     } else {
+      const sb = await getAdminClient(Astro.cookies)
       const slug = generateSlug(title)
-      const coverUrl = await uploadCover(slug, cover)
-      await createManga({
+      const coverUrl = await uploadCover(sb, slug, cover)
+      await createManga(sb, {
         title,
         slug,
         cover_url: coverUrl,

@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro'
 import { getGenreCounts, createGenre, updateGenre, deleteGenre, generateGenreSlug } from '../../lib/genres'
+import { getAdminClient } from '../../lib/supabase-server'
 
 let genres: any[] = []
 let error: string | null = null
@@ -10,19 +11,18 @@ if (Astro.request.method === 'POST') {
   try {
     const form = await Astro.request.formData()
     const action = form.get('action')
+    const sb = await getAdminClient(Astro.cookies)
     if (action === 'add') {
       const name = String(form.get('name') || '').trim()
-      if (name) await createGenre({ name, slug: generateGenreSlug(name) })
+      if (name) await createGenre(sb, { name, slug: generateGenreSlug(name) })
       else error = 'Nama genre wajib diisi.'
     } else if (action === 'edit') {
       const id = form.get('id')
       const name = String(form.get('name') || '').trim()
-      if (id && name) await updateGenre(id, { name, slug: generateGenreSlug(name) })
+      if (id && name) await updateGenre(sb, id, { name, slug: generateGenreSlug(name) })
     } else if (action === 'delete') {
       const id = form.get('id')
-      const g = genres.find((x) => x.id === id)
-      if (g && g.count > 0) error = `Genre "${g.name}" masih dipakai ${g.count} manga.`
-      else if (id) await deleteGenre(id)
+      if (id) await deleteGenre(sb, id)
     }
     if (!error) notice = 'Tersimpan.'
   } catch (e: any) {

@@ -1,4 +1,4 @@
-import { supabase } from '../db/supabase'
+import { supabase as anon } from '../db/supabase'
 
 const COVER_BUCKET = 'covers'
 const CHAPTER_BUCKET = 'chapters'
@@ -6,7 +6,8 @@ const CHAPTER_BUCKET = 'chapters'
 /**
  * Upload cover image for manga
  */
-export async function uploadCover(mangaId, file) {
+export async function uploadCover(client, mangaId, file) {
+  const supabase = client || anon
   const ext = file.name.split('.').pop()
   const filePath = `${mangaId}/cover.${ext}`
 
@@ -30,7 +31,8 @@ export async function uploadCover(mangaId, file) {
 /**
  * Upload chapter page image
  */
-export async function uploadChapterPage(mangaId, chapterId, file, pageNumber) {
+export async function uploadChapterPage(client, mangaId, chapterId, file, pageNumber) {
+  const supabase = client || anon
   const ext = file.name.split('.').pop()
   const paddedNum = String(pageNumber).padStart(3, '0')
   const filePath = `${mangaId}/${chapterId}/${paddedNum}.${ext}`
@@ -55,9 +57,9 @@ export async function uploadChapterPage(mangaId, chapterId, file, pageNumber) {
 /**
  * Upload multiple chapter pages
  */
-export async function uploadChapterPages(mangaId, chapterId, files) {
+export async function uploadChapterPages(client, mangaId, chapterId, files) {
   const uploadPromises = files.map((file, index) =>
-    uploadChapterPage(mangaId, chapterId, file, index + 1)
+    uploadChapterPage(client, mangaId, chapterId, file, index + 1)
   )
 
   const urls = await Promise.all(uploadPromises)
@@ -71,7 +73,8 @@ export async function uploadChapterPages(mangaId, chapterId, files) {
 /**
  * Delete cover image
  */
-export async function deleteCover(mangaId) {
+export async function deleteCover(client, mangaId) {
+  const supabase = client || anon
   const { data, error } = await supabase.storage
     .from(COVER_BUCKET)
     .list(mangaId)
@@ -91,7 +94,8 @@ export async function deleteCover(mangaId) {
 /**
  * Delete all chapter pages
  */
-export async function deleteChapterPages(mangaId, chapterId) {
+export async function deleteChapterPages(client, mangaId, chapterId) {
+  const supabase = client || anon
   const { data, error } = await supabase.storage
     .from(CHAPTER_BUCKET)
     .list(`${mangaId}/${chapterId}`)
@@ -111,7 +115,7 @@ export async function deleteChapterPages(mangaId, chapterId) {
 /**
  * Get storage usage stats
  */
-export async function getStorageStats() {
+export async function getStorageStats(supabase = anon) {
   const [covers, chapters] = await Promise.all([
     supabase.storage.from(COVER_BUCKET).list(),
     supabase.storage.from(CHAPTER_BUCKET).list()
