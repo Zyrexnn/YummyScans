@@ -21,6 +21,11 @@ DESIGN-figma.md
 .opencode/
 opencode.json
 
+# agent skills (local tooling)
+.agents/
+.claude/
+skills-lock.json
+
 # os
 .DS_Store
 Thumbs.db
