@@ -113,6 +113,7 @@ const backUrl = `/manga/${mangaId}`
         white-space: nowrap;
         display: flex;
         align-items: center;
+        flex: 1;
       }
       .top-bar .title .chapter-label {
         color: #ffffff;
@@ -120,6 +121,24 @@ const backUrl = `/manga/${mangaId}`
         flex-shrink: 0;
         margin-left: 4px;
       }
+      .fav-btn {
+        background: none;
+        border: none;
+        color: rgba(255,255,255,0.5);
+        cursor: pointer;
+        padding: 8px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
+        border-left: 1px solid rgba(255,255,255,0.08);
+      }
+      .fav-btn:hover { color: #ef4444; }
+      .fav-btn.active { color: #ef4444; }
+      .fav-btn svg { width: 20px; height: 20px; transition: transform 0.2s; }
+      .fav-btn:hover svg { transform: scale(1.15); }
+      .fav-btn.active svg { fill: #ef4444; }
       .nav-buttons {
         position: fixed;
         bottom: 24px;
@@ -224,6 +243,9 @@ const backUrl = `/manga/${mangaId}`
           <div class="title">
             <span class="chapter-label">Ch.{chapterNum}</span>
           </div>
+          <button id="reader-fav-btn" class="fav-btn" aria-label="Tambah ke favorit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
         </div>
 
         <div class="reader-container">
@@ -338,6 +360,47 @@ const backUrl = `/manga/${mangaId}`
           }, { rootMargin: '0px 0px -50% 0px', threshold: 0.5 });
           pageElements.forEach(el => observer.observe(el));
         }
+
+        // Favorite button
+        (function() {
+          const btn = document.getElementById('reader-fav-btn');
+          if (!btn) return;
+          const slug = mangaSlug;
+          const title = mangaTitle;
+          const cover = coverUrl;
+          const mangaType = type;
+
+          function getFavs() {
+            try { return JSON.parse(localStorage.getItem('yummy:favorites') || '[]'); }
+            catch { return []; }
+          }
+          function saveFavs(f) {
+            try { localStorage.setItem('yummy:favorites', JSON.stringify(f)); } catch {}
+          }
+          function isFav(slug) { return getFavs().some(f => f.slug === slug); }
+          function updateBtn() {
+            const fav = isFav(slug);
+            btn.classList.toggle('active', fav);
+            const svg = btn.querySelector('svg');
+            if (svg) svg.setAttribute('fill', fav ? '#ef4444' : 'none');
+            btn.setAttribute('aria-label', fav ? 'Hapus dari favorit' : 'Tambah ke favorit');
+          }
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const favs = getFavs();
+            const idx = favs.findIndex(f => f.slug === slug);
+            if (idx >= 0) {
+              favs.splice(idx, 1);
+            } else {
+              favs.push({ slug, title, coverUrl: cover, type: mangaType });
+            }
+            saveFavs(favs);
+            updateBtn();
+            // Notify other tabs
+            try { localStorage.setItem('yummy:favorites:touch', Date.now().toString()); } catch {}
+          });
+          updateBtn();
+        })();
 
         // Keyboard nav
         document.addEventListener('keydown', (e) => {

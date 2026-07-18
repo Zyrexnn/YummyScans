@@ -9,9 +9,10 @@ interface FavoriteButtonProps {
   title: string
   coverUrl: string | null
   type?: string
+  iconOnly?: boolean
 }
 
-export default function FavoriteButton({ slug, title, coverUrl, type }: FavoriteButtonProps) {
+export default function FavoriteButton({ slug, title, coverUrl, type, iconOnly }: FavoriteButtonProps) {
   const { toggle, isFavorite, ready } = useFavorites()
   const [mounted, setMounted] = useState(false)
   const [animating, setAnimating] = useState(false)
@@ -29,6 +30,24 @@ export default function FavoriteButton({ slug, title, coverUrl, type }: Favorite
   }
 
   if (!mounted) return null
+
+  if (iconOnly) {
+    return (
+      <button
+        onClick={handleClick}
+        className={`p-2 rounded-full backdrop-blur shadow transition-all duration-200 ${
+          fav
+            ? 'bg-red-500 text-white shadow-lg shadow-red-500/30 scale-110'
+            : 'bg-background/80 text-foreground hover:text-red-500 hover:bg-red-500/20'
+        } ${animating ? 'scale-125' : ''}`}
+        aria-label={fav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+      >
+        <Heart
+          className={`w-5 h-5 transition-all duration-200 ${fav ? 'fill-current' : ''} ${animating ? 'animate-ping' : ''}`}
+        />
+      </button>
+    )
+  }
 
   return (
     <button

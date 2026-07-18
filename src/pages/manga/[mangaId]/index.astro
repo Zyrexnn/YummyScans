@@ -2,6 +2,7 @@
 import EditorialLayout from '../../../layouts/EditorialLayout.astro'
 import AdSlot from '../../../components/AdSlot.astro'
 import MangaCard from '../../../components/MangaCard'
+import ContinueReading from '../../../components/ContinueReading'
 import { Badge } from '../../../components/ui/badge'
 import { ArrowLeft, BookOpen, User, Calendar, ArrowRight, Clock } from 'lucide-react'
 import { fetchDetail, fetchGenreManga } from '../../../lib/komiku'
@@ -104,14 +105,25 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
           <div class="flex flex-col md:flex-row gap-8 md:gap-12">
 
             <div class="w-full sm:w-[200px] md:w-[240px] lg:w-[280px] flex-shrink-0">
-              <div class="aspect-[3/4] rounded-lg overflow-hidden bg-secondary">
-                {coverUrl ? (
-                  <img src={coverUrl} alt={title} class="w-full h-full object-cover" loading="eager" />
-                ) : (
-                  <div class="w-full h-full flex items-center justify-center">
-                    <BookOpen class="w-12 h-12 text-muted-foreground" />
-                  </div>
-                )}
+              <div class="relative">
+                <div class="aspect-[3/4] rounded-lg overflow-hidden bg-secondary">
+                  {coverUrl ? (
+                    <img src={coverUrl} alt={title} class="w-full h-full object-cover" loading="eager" />
+                  ) : (
+                    <div class="w-full h-full flex items-center justify-center">
+                      <BookOpen class="w-12 h-12 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-3 pt-10 rounded-b-lg">
+                  <FavoriteButton
+                    client:load
+                    slug={mangaId}
+                    title={title}
+                    coverUrl={coverUrl}
+                    type={mangaType}
+                  />
+                </div>
               </div>
             </div>
 
@@ -171,6 +183,12 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
               )}
 
               <div class="flex flex-wrap gap-3">
+                <ContinueReading
+                  client:load
+                  mangaSlug={mangaId}
+                  firstChapterSlug={firstChapter?.slug || firstChapter?.id}
+                  firstChapterNum={firstChapter?.num}
+                />
                 {firstChapter && (
                   <a
                     href={`/manga/${mangaId}/${firstChapter.slug || firstChapter.id}`}
@@ -189,13 +207,6 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
                     <ArrowRight class="w-4 h-4" />
                   </a>
                 )}
-                <FavoriteButton
-                  client:visible
-                  slug={mangaId}
-                  title={title}
-                  coverUrl={coverUrl}
-                  type={mangaType}
-                />
               </div>
             </div>
           </div>
