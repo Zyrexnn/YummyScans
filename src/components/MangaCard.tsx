@@ -1,8 +1,10 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Badge } from './ui/badge'
-import { BookOpen, Clock } from 'lucide-react'
+import { BookOpen, Clock, Heart } from 'lucide-react'
+import { useFavorites } from '../hooks/useFavorites'
 
 interface MangaCardProps {
   title: string
@@ -14,6 +16,7 @@ interface MangaCardProps {
   genres?: { id: string; name: string; slug: string }[]
   status?: string
   index?: number
+  className?: string
 }
 
 const FLAG: Record<string, string> = { Manhwa: '🇰🇷', Manga: '🇯🇵', Manhua: '🇨🇳' }
@@ -42,14 +45,27 @@ export default function MangaCard({
   updatedOn,
   genres,
   status,
-  index = 0
+  index = 0,
+  className = ''
 }: MangaCardProps) {
   const fresh = updatedOn ? isNew(updatedOn) : false
+  const { favorites, toggle, isFavorite, ready } = useFavorites()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  const fav = ready ? isFavorite(slug) : false
+
+  const handleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    toggle({ slug, title, coverUrl, type })
+  }
 
   return (
     <motion.a
       href={`/manga/${slug}`}
-      className="group block"
+      className={`group block ${className}`}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-30px' }}
@@ -92,8 +108,17 @@ export default function MangaCard({
           {fresh && <span className="rounded bg-red-600 px-1 py-0.5 text-[9px] font-bold text-white">NEW</span>}
         </div>
 
-        {/* top-right: flag + status */}
+        {/* top-right: favorite + flag + status */}
         <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
+          {mounted && (
+            <button
+              onClick={handleFavorite}
+              aria-label={fav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+              className="flex h-6 w-6 items-center justify-center rounded-full bg-background/80 backdrop-blur text-foreground/70 hover:bg-background hover:text-red-500 transition-colors"
+            >
+              <Heart className={`h-3.5 w-3.5 ${fav ? 'fill-current text-red-500' : 'stroke-current'}`} strokeWidth={2} />
+            </button>
+          )}
           {status && (
             <Badge
               variant={status === 'completed' ? 'default' : 'secondary'}
