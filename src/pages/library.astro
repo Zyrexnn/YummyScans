@@ -1,0 +1,12 @@
+---
+import EditorialLayout from '../layouts/EditorialLayout.astro'
+import Library from '../components/Library'
+---
+
+<EditorialLayout title="Library - YummyScans">
+  <section class="section-spacing bg-background">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Library client:visible />
+    </div>
+  </section>
+</EditorialLayout>
