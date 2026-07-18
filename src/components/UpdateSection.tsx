@@ -1,7 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { LayoutGrid, List, Clock } from 'lucide-react'
+import { useMemo, useState, useEffect } from 'react'
+import { LayoutGrid, List, Heart } from 'lucide-react'
+import MangaCard from './MangaCard'
+import { useFavorites } from '../hooks/useFavorites'
 import type { LatestManga } from '../lib/komiku'
 
 type Tab = 'Project' | 'Mirror'
@@ -25,6 +27,27 @@ function relTime(s: string): string {
 function isNew(s: string): boolean {
   const t = s.toLowerCase()
   return t.includes('menit') || t.includes('jam') || /^1\s*hari/.test(t)
+}
+
+function FavHeart({ slug, title, coverUrl, type }: { slug: string; title: string; coverUrl: string | null; type?: string }) {
+  const { toggle, isFavorite, ready } = useFavorites()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
+  if (!mounted || !ready) return <div className="w-7 h-7" />
+
+  const fav = isFavorite(slug)
+  return (
+    <button
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle({ slug, title, coverUrl, type }) }}
+      className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors ${
+        fav ? 'text-red-500' : 'text-muted-foreground hover:text-red-400'
+      }`}
+      aria-label={fav ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+    >
+      <Heart className={`h-4 w-4 ${fav ? 'fill-current' : ''}`} />
+    </button>
+  )
 }
 
 export default function UpdateSection({ project = [], mirror = [] }: { project?: LatestManga[]; mirror?: LatestManga[] }) {
@@ -95,39 +118,16 @@ export default function UpdateSection({ project = [], mirror = [] }: { project?:
           view === 'grid' ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {items.map((m, i) => (
-                <a
+                <MangaCard
                   key={m.slug + i}
-                  href={`/manga/${m.slug}`}
-                  className="group block"
-                >
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-secondary">
-                    <img
-                      src={m.coverUrl}
-                      alt={m.title}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      onError={(e) => {
-                        ;(e.target as HTMLImageElement).style.display = 'none'
-                      }}
-                    />
-                    {/* top-left: time */}
-                    <div className="absolute left-1.5 top-1.5 flex items-center gap-1">
-                      <span className="flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
-                        <Clock className="h-3 w-3" />
-                        {relTime(m.updatedOn)}
-                      </span>
-                      {isNew(m.updatedOn) && (
-                        <span className="rounded bg-red-600 px-1 py-0.5 text-[9px] font-bold text-white">NEW</span>
-                      )}
-                    </div>
-                    {/* top-right: flag */}
-                    <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-background text-[10px] leading-none shadow">
-                      {FLAG[m.type] || '🏳️'}
-                    </span>
-                  </div>
-                  <h3 className="mt-2 line-clamp-2 text-[13px] font-bold leading-tight text-foreground">{m.title}</h3>
-                  <p className="mt-1 truncate text-[10px] text-muted-foreground">{m.chapter || 'Ch. -'}</p>
-                </a>
+                  title={m.title}
+                  coverUrl={m.coverUrl}
+                  slug={m.slug}
+                  type={m.type}
+                  chapter={m.chapter}
+                  updatedOn={m.updatedOn}
+                  index={i}
+                />
               ))}
             </div>
           ) : (
@@ -148,6 +148,7 @@ export default function UpdateSection({ project = [], mirror = [] }: { project?:
                       t.style.display = 'none'
                     }}
                   />
+                  <FavHeart slug={m.slug} title={m.title} coverUrl={m.coverUrl} type={m.type} />
                   <div className="min-w-0 flex-1">
                     <h3 className="line-clamp-2 text-sm font-bold text-foreground">{m.title}</h3>
                     <p className="mt-1 truncate text-xs text-muted-foreground">
