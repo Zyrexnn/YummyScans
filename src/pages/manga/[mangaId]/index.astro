@@ -1,9 +1,11 @@
 ---
 import EditorialLayout from '../../../layouts/EditorialLayout.astro'
 import AdSlot from '../../../components/AdSlot.astro'
+import MangaCard from '../../../components/MangaCard'
 import { Badge } from '../../../components/ui/badge'
 import { ArrowLeft, BookOpen, User, Calendar, ArrowRight, Clock } from 'lucide-react'
 import { fetchDetail, fetchGenreManga } from '../../../lib/komiku'
+import FavoriteButton from '../../../components/FavoriteButton'
 
 const { mangaId } = Astro.params
 
@@ -187,6 +189,13 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
                     <ArrowRight class="w-4 h-4" />
                   </a>
                 )}
+                <FavoriteButton
+                  client:visible
+                  slug={mangaId}
+                  title={title}
+                  coverUrl={coverUrl}
+                  type={mangaType}
+                />
               </div>
             </div>
           </div>
@@ -225,10 +234,11 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
                     <a
                       href={`/manga/${mangaId}/${ch.slug}`}
                       class:list={[
-                        "chapter-item flex items-center justify-center rounded-lg py-2 text-xs font-medium transition no-underline text-foreground hover:bg-foreground hover:text-background",
+                        "chapter-item flex items-center justify-center rounded-lg py-2 text-xs font-medium transition no-underline text-foreground hover:bg-foreground hover:text-background relative",
                         i >= INITIAL_SHOW ? "hidden" : "bg-secondary"
                       ]}
                       data-index={i}
+                      data-slug={ch.slug}
                     >
                       {ch.num}
                     </a>
@@ -264,6 +274,32 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
         )
       })()}
 
+      <span id="manga-id-data" data-id={mangaId} style="display:none"></span>
+      <script is:inline>
+        (function() {
+          var mangaId = (document.getElementById('manga-id-data')?.getAttribute('data-id')) || '';
+          if (!mangaId) return;
+          try {
+            var history = JSON.parse(localStorage.getItem('yummy:history') || '[]');
+            var readChapters = [];
+            for (var i = 0; i < history.length; i++) {
+              if (history[i].mangaSlug === mangaId) {
+                readChapters.push(history[i].chapterSlug);
+              }
+            }
+            if (readChapters.length === 0) return;
+            var items = document.querySelectorAll('#chapter-grid .chapter-item');
+            for (var j = 0; j < items.length; j++) {
+              var slug = items[j].getAttribute('data-slug');
+              if (slug && readChapters.indexOf(slug) !== -1) {
+                items[j].classList.add('bg-primary', 'text-primary-foreground', 'font-bold');
+                items[j].classList.remove('bg-secondary', 'text-foreground');
+              }
+            }
+          } catch(e) {}
+        })();
+      </script>
+
       {chapters.length === 0 && !error && (
         <section class="pb-16 bg-background">
           <div class="max-w-[1280px] mx-auto px-6 text-center">
@@ -283,31 +319,16 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
             </div>
             <p class="text-xs text-muted-foreground mb-4">Berdasarkan genre: {genres.join(', ')}</p>
             <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-              {recommendations.map(m => (
-                <a
-                  href={`/manga/${m.slug}`}
-                  class="group block"
-                >
-                  <div class="relative aspect-[3/4] overflow-hidden rounded-lg bg-secondary">
-                    <img
-                      src={m.coverUrl}
-                      alt={m.title}
-                      loading="lazy"
-                      class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      onError={(e) => {
-                        const t = e.target as HTMLImageElement
-                        t.style.display = 'none'
-                      }}
-                    />
-                    <span class="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded bg-background text-[10px] leading-none shadow">
-                      {m.type === 'Manhwa' ? '🇰🇷' : m.type === 'Manhua' ? '🇨🇳' : '🇯🇵'}
-                    </span>
-                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-2 pt-6">
-                      <h3 class="line-clamp-2 text-[12px] font-bold leading-tight text-white">{m.title}</h3>
-                      {m.chapter && <p class="mt-0.5 truncate text-[10px] text-white/50">{m.chapter}</p>}
-                    </div>
-                  </div>
-                </a>
+              {recommendations.map((m, i) => (
+                <MangaCard
+                  client:load
+                  title={m.title}
+                  coverUrl={m.coverUrl}
+                  slug={m.slug}
+                  type={m.type}
+                  chapter={m.chapter}
+                  index={i}
+                />
               ))}
             </div>
           </div>
