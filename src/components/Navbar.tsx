@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Menu, X, BookOpen, Home, Compass, Clock, Swords, Heart, Wand2, Rocket, Flame, Ghost } from 'lucide-react'
+import { Search, Menu, X, BookOpen, Home, Compass, Clock, Swords, Heart, Wand2, Rocket, Flame, Ghost, Bookmark, History } from 'lucide-react'
 import { Button } from './ui/button'
 import ThemeToggle from './ThemeToggle'
 
@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: '/search', label: 'Cari', icon: Search },
   { href: '/genre', label: 'Genre', icon: Compass },
   { href: '/latest', label: 'Terbaru', icon: Clock },
+  { href: '/library', label: 'Library', icon: Bookmark },
 ]
 
 const QUICK_GENRES = [
