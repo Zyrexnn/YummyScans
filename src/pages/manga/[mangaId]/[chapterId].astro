@@ -10,6 +10,8 @@ let chapterTitle = ''
 let error: string | null = null
 let prevChapterSlug: string | null = null
 let nextChapterSlug: string | null = null
+let coverUrl: string | null = null
+let mangaType = ''
 
 try {
   const chapterUrl = `${BASE_URL}/komik/${mangaId}/${chapterId}/`
@@ -29,6 +31,8 @@ try {
 
   chapterTitle = chapterData.title || ''
   mangaTitle = detail?.title || mangaId?.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || ''
+  coverUrl = detail?.coverUrl || null
+  mangaType = detail?.type || ''
 
   const chapterMatch = chapterId?.match(/chapter-([\d.]+)/)
   chapterNum = chapterMatch ? chapterMatch[1] : '?'
@@ -192,7 +196,14 @@ const backUrl = `/manga/${mangaId}`
       }
     </style>
   </head>
-  <body>
+  <body
+    data-manga-slug={mangaId}
+    data-chapter-slug={chapterId}
+    data-chapter-num={chapterNum}
+    data-manga-title={mangaTitle}
+    data-cover-url={coverUrl}
+    data-manga-type={mangaType}
+  >
 
     {error || pages.length === 0 ? (
       <div class="error-page">
@@ -224,6 +235,7 @@ const backUrl = `/manga/${mangaId}`
                 loading={page.number > 1 ? 'lazy' : 'eager'}
               />
               <div class="page-counter">{page.number} / {pages.length}</div>
+              <div data-page="{page.number}"></div>
             </div>
           ))}
         </div>
@@ -245,16 +257,99 @@ const backUrl = `/manga/${mangaId}`
       </>
     )}
 
-    <script>
-      document.addEventListener('keydown', (e) => {
-        const prevLink = document.querySelector('.nav-buttons a:nth-child(1)') as HTMLAnchorElement
-        const nextLink = document.querySelector('.nav-buttons a:nth-child(3)') as HTMLAnchorElement
-        if (e.key === 'ArrowLeft' && prevLink && !prevLink.classList.contains('disabled')) {
-          window.location.href = prevLink.href
-        } else if (e.key === 'ArrowRight' && nextLink && !nextLink.classList.contains('disabled')) {
-          window.location.href = nextLink.href
+    <script is:inline>
+      // History tracking & page resume for reader
+      (function() {
+        const body = document.body;
+        const mangaSlug = body.getAttribute('data-manga-slug') || '';
+        const chapterSlug = body.getAttribute('data-chapter-slug') || '';
+        const chapterNum = body.getAttribute('data-chapter-num') || '';
+        const mangaTitle = body.getAttribute('data-manga-title') || '';
+        const coverUrl = body.getAttribute('data-cover-url') || '';
+        const type = body.getAttribute('data-manga-type') || '';
+
+        if (!mangaSlug || !chapterSlug) return;
+
+        // Initialize history from localStorage
+        function getHistory() {
+          try {
+            return JSON.parse(localStorage.getItem('yummy:history') || '[]');
+          } catch { return []; }
         }
-      })
+        function saveHistory(h) {
+          try { localStorage.setItem('yummy:history', JSON.stringify(h)); } catch {}
+        }
+
+        // Record this chapter read
+        function recordHistory() {
+          const hist = getHistory();
+          const existingIdx = hist.findIndex(h => h.mangaSlug === mangaSlug && h.chapterSlug === chapterSlug);
+          const entry = {
+            mangaSlug, mangaTitle, coverUrl, type,
+            chapterSlug, chapterNum,
+            page: 1,
+            readAt: Date.now()
+          };
+          if (existingIdx >= 0) {
+            hist[existingIdx] = { ...hist[existingIdx], ...entry, page: hist[existingIdx].page || 1, readAt: Date.now() };
+          } else {
+            hist.unshift(entry);
+          }
+          if (hist.length > 50) hist.length = 50;
+          saveHistory(hist);
+        }
+
+        // Update current page in history
+        function updatePage(page) {
+          const hist = getHistory();
+          const idx = hist.findIndex(h => h.mangaSlug === mangaSlug && h.chapterSlug === chapterSlug);
+          if (idx >= 0) {
+            hist[idx].page = page;
+            hist[idx].readAt = Date.now();
+            saveHistory(hist);
+          }
+        }
+
+        // Resume to last page
+        function resumePage() {
+          const hist = getHistory();
+          const entry = hist.find(h => h.mangaSlug === mangaSlug && h.chapterSlug === chapterSlug);
+          if (entry && entry.page && entry.page > 1) {
+            const target = document.querySelector('[data-page="' + entry.page + '"]');
+            if (target) {
+              target.scrollIntoView({ behavior: 'instant', block: 'start' });
+            }
+          }
+        }
+
+        recordHistory();
+        resumePage();
+
+        // Track visible page via IntersectionObserver
+        const pageElements = document.querySelectorAll('[data-page]');
+        if (pageElements.length && 'IntersectionObserver' in window) {
+          const observer = new IntersectionObserver((entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                const pageNum = parseInt(entry.target.getAttribute('data-page') || '1', 10);
+                updatePage(pageNum);
+              }
+            }
+          }, { rootMargin: '0px 0px -50% 0px', threshold: 0.5 });
+          pageElements.forEach(el => observer.observe(el));
+        }
+
+        // Keyboard nav
+        document.addEventListener('keydown', (e) => {
+          const prevLink = document.querySelector('.nav-buttons a:nth-child(1)');
+          const nextLink = document.querySelector('.nav-buttons a:nth-child(3)');
+          if (e.key === 'ArrowLeft' && prevLink && !prevLink.classList.contains('disabled')) {
+            window.location.href = prevLink.href;
+          } else if (e.key === 'ArrowRight' && nextLink && !nextLink.classList.contains('disabled')) {
+            window.location.href = nextLink.href;
+          }
+        });
+      })();
     </script>
 
   </body>
