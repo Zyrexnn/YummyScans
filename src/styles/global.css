@@ -312,3 +312,20 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Card Entry Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.45s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
+}
+

@@ -255,6 +255,7 @@ const backUrl = `/manga/${mangaId}`
                 src={page.url}
                 alt={`Page ${page.number}`}
                 loading={page.number > 1 ? 'lazy' : 'eager'}
+                decoding="async"
               />
               <div class="page-counter">{page.number} / {pages.length}</div>
               <div data-page="{page.number}"></div>

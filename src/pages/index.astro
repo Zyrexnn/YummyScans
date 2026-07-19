@@ -43,7 +43,7 @@ try {
   </section>
 
   {/* REKOMENDASI */}
-  <Rekomendasi client:load manga={latestFeed} />
+  <Rekomendasi client:visible manga={latestFeed} />
 
   {/* AD: Medium Rectangle 300x250 */}
   <section class="py-6 bg-background">
@@ -53,7 +53,7 @@ try {
   </section>
 
   {/* UPDATE */}
-  <UpdateSection client:load project={projectFeed} mirror={latestFeed} />
+  <UpdateSection client:visible project={projectFeed} mirror={latestFeed} />
 
   {/* AD: Medium Rectangle 300x250 */}
   <section class="py-6 bg-background">

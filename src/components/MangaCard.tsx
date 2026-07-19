@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { Badge } from './ui/badge'
 import { BookOpen, Clock, Heart } from 'lucide-react'
 import { useFavorites } from '../hooks/useFavorites'
@@ -63,21 +62,19 @@ export default function MangaCard({
   }
 
   return (
-    <motion.a
+    <a
       href={`/manga/${slug}`}
-      className={`group block ${className}`}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-30px' }}
-      transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className={`group block ${className} animate-fade-in-up`}
+      style={{ animationDelay: `${index * 0.04}s`, contentVisibility: 'auto', containIntrinsicSize: '0 250px' }}
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-secondary">
         {coverUrl ? (
-          <motion.img
+          <img
             src={coverUrl}
             alt={title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
+            decoding="async"
             onError={(e) => {
               const target = e.target as HTMLImageElement
               target.style.display = 'none'
@@ -142,6 +139,6 @@ export default function MangaCard({
       {chapter && (
         <p className="mt-1 truncate text-[10px] text-muted-foreground">{chapter}</p>
       )}
-    </motion.a>
+    </a>
   )
 }
