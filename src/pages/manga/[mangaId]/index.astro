@@ -1,6 +1,5 @@
 ---
 import EditorialLayout from '../../../layouts/EditorialLayout.astro'
-import AdSlot from '../../../components/AdSlot.astro'
 import MangaCard from '../../../components/MangaCard'
 import ContinueReading from '../../../components/ContinueReading'
 import { Badge } from '../../../components/ui/badge'
@@ -210,17 +209,6 @@ const latestChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* AD: 300x250 */}
-      <section class="py-6 bg-background">
-        <div class="max-w-[1280px] mx-auto px-6 flex justify-center">
-          <AdSlot
-            width={300}
-            height={250}
-            adKey="e9535ef5bb08e3bcfa1e00b46abac2e6"
-          />
         </div>
       </section>
 
