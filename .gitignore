@@ -29,3 +29,6 @@ skills-lock.json
 # os
 .DS_Store
 Thumbs.db
+
+# graphify (auto-generated knowledge graph)
+graphify-out/
