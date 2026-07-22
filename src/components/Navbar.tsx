@@ -50,8 +50,8 @@ export default function Navbar() {
       <nav
         className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-background/90 backdrop-blur-xl shadow-sm'
-            : 'bg-background border-b border-border'
+            ? 'bg-[#0a0a0b]/95 backdrop-blur-xl shadow-lg shadow-black/20'
+            : 'bg-[#0a0a0b]'
         }`}
       >
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 h-14 sm:h-[60px] flex items-center justify-between">
@@ -60,10 +60,10 @@ export default function Navbar() {
             href="/"
             className="flex items-center gap-2 group no-underline shrink-0"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-primary rounded-lg flex items-center justify-center transition-transform group-hover:rotate-[-4deg] duration-300">
-              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white rounded-lg flex items-center justify-center transition-transform group-hover:rotate-[-4deg] duration-300">
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
             </div>
-            <span className="text-lg sm:text-[22px] font-bold tracking-tight text-foreground">
+            <span className="text-lg sm:text-[22px] font-bold tracking-tight text-white">
               YummyScans
             </span>
           </a>
@@ -76,8 +76,8 @@ export default function Navbar() {
                 href={link.href}
                 className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors no-underline ${
                   isActive(link.href)
-                    ? 'bg-secondary text-foreground'
-                    : 'text-foreground/70 hover:bg-secondary hover:text-foreground'
+                    ? 'bg-white/10 text-white'
+                    : 'text-white/60 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 {link.label}
@@ -87,26 +87,38 @@ export default function Navbar() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-1.5">
-            <ThemeToggle />
-            <a href="/search">
-              <Button variant="ghost" size="icon" className="rounded-lg hover:bg-secondary">
-                <Search className="w-5 h-5" />
-              </Button>
-            </a>
+            <form action="/search" method="GET" className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+              <input
+                type="text"
+                name="q"
+                placeholder="Cari manga..."
+                className="h-9 w-[200px] rounded-lg bg-white/10 border border-white/10 pl-9 pr-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/30 transition-colors cursor-pointer"
+                onFocus={(e) => {
+                  (e.target as HTMLInputElement).blur()
+                  window.location.href = '/search'
+                }}
+              />
+            </form>
+            <div className="text-white">
+              <ThemeToggle />
+            </div>
           </div>
 
           {/* Mobile Actions */}
           <div className="flex md:hidden items-center gap-1">
-            <a href="/search" className="p-2 rounded-lg hover:bg-secondary transition-colors">
-              <Search className="w-5 h-5 text-foreground" />
+            <a href="/search" className="p-2 rounded-lg hover:bg-white/10 transition-colors">
+              <Search className="w-5 h-5 text-white" />
             </a>
-            <ThemeToggle />
+            <div className="text-white">
+              <ThemeToggle />
+            </div>
             <button
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle menu"
             >
-              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
             </button>
           </div>
         </div>
@@ -116,42 +128,38 @@ export default function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Overlay */}
             <motion.div
-              className="fixed inset-0 z-[60] bg-black/50 md:hidden"
+              className="fixed inset-0 z-[60] bg-black/60 md:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
             />
-            {/* Drawer */}
             <motion.div
-              className="fixed inset-y-0 left-0 z-[70] w-[280px] bg-background shadow-xl md:hidden flex flex-col"
+              className="fixed inset-y-0 left-0 z-[70] w-[280px] bg-[#0a0a0b] shadow-xl md:hidden flex flex-col"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              {/* Drawer Header */}
-              <div className="flex items-center justify-between px-5 h-14 border-b border-border shrink-0">
+              <div className="flex items-center justify-between px-5 h-14 border-b border-white/10 shrink-0">
                 <a href="/" className="flex items-center gap-2 no-underline" onClick={() => setIsOpen(false)}>
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <BookOpen className="w-4 h-4 text-primary-foreground" />
+                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                    <BookOpen className="w-4 h-4 text-black" />
                   </div>
-                  <span className="text-lg font-bold tracking-tight text-foreground">
+                  <span className="text-lg font-bold tracking-tight text-white">
                     YummyScans
                   </span>
                 </a>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                   aria-label="Close menu"
                 >
-                  <X className="w-5 h-5 text-muted-foreground" />
+                  <X className="w-5 h-5 text-white/60" />
                 </button>
               </div>
 
-              {/* Nav Links */}
               <div className="flex-1 overflow-y-auto py-3 px-3">
                 <div className="space-y-0.5">
                   {NAV_LINKS.map((link) => (
@@ -161,8 +169,8 @@ export default function Navbar() {
                       onClick={() => setIsOpen(false)}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors no-underline ${
                         isActive(link.href)
-                          ? 'bg-secondary text-foreground'
-                          : 'text-foreground/70 hover:bg-secondary hover:text-foreground'
+                          ? 'bg-white/10 text-white'
+                          : 'text-white/60 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       <link.icon className="w-4 h-4 shrink-0" />
@@ -171,9 +179,8 @@ export default function Navbar() {
                   ))}
                 </div>
 
-                {/* Genre Quick Links */}
                 <div className="mt-5">
-                  <p className="px-3 mb-2 text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                  <p className="px-3 mb-2 text-[11px] font-mono uppercase tracking-wider text-white/40">
                     Genre Populer
                   </p>
                   <div className="space-y-0.5">
@@ -182,9 +189,9 @@ export default function Navbar() {
                         key={g.slug}
                         href={`/genre/${g.slug}`}
                         onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors no-underline"
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/60 hover:bg-white/10 hover:text-white transition-colors no-underline"
                       >
-                        <g.icon className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                        <g.icon className="w-3.5 h-3.5 shrink-0 text-white/40" />
                         {g.name}
                       </a>
                     ))}
@@ -192,9 +199,8 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* Drawer Footer */}
-              <div className="shrink-0 border-t border-border p-4">
-                <a href="/admin/login" onClick={() => setIsOpen(false)} className="text-sm font-medium text-foreground/70 hover:text-foreground">
+              <div className="shrink-0 border-t border-white/10 p-4">
+                <a href="/admin/login" onClick={() => setIsOpen(false)} className="text-sm font-medium text-white/60 hover:text-white">
                   Admin Login
                 </a>
               </div>

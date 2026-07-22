@@ -25,13 +25,13 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
       aria-label="Toggle dark mode"
     >
       {isDark ? (
-        <Sun className="w-5 h-5 text-foreground" />
+        <Sun className="w-5 h-5" />
       ) : (
-        <Moon className="w-5 h-5 text-foreground" />
+        <Moon className="w-5 h-5" />
       )}
     </button>
   )

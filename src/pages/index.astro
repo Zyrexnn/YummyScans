@@ -3,8 +3,12 @@ import EditorialLayout from '../layouts/EditorialLayout.astro'
 import AdSlot from '../components/AdSlot.astro'
 import Popunder from '../components/Popunder.astro'
 import Hero from '../components/Hero'
-import Rekomendasi from '../components/Rekomendasi'
+import TrendingSection from '../components/TrendingSection'
+import PopularGrid from '../components/PopularGrid'
 import UpdateSection from '../components/UpdateSection'
+import Rekomendasi from '../components/Rekomendasi'
+
+import DownloadApp from '../components/DownloadApp'
 import { fetchLatest } from '../lib/komiku'
 import { getMangaList, toLatestShape } from '../lib/manga'
 
@@ -28,38 +32,39 @@ try {
 
 <EditorialLayout title="YummyScans - Baca Komik Sub Indo">
 
-  {/* POPUNDER — once per page */}
   <Popunder />
 
   {/* HERO */}
-  <Hero client:load />
+  <Hero client:load manga={latestFeed} />
 
-  {/* AD: Leaderboard — 728x90 desktop / 320x50 mobile */}
-  <section class="py-6 bg-background">
-    <div class="max-w-[1280px] mx-auto px-6 flex justify-center">
+  {/* AD: Leaderboard */}
+  <section class="bg-background border-t border-border/50">
+    <div class="max-w-[1280px] mx-auto px-6 py-4 flex justify-center">
       <AdSlot width={728} height={90} adKey="2d5b42ffd6cb16d65bd3eb553d7e0eec" class="hidden md:block" />
       <AdSlot width={320} height={50} adKey="a675c284043575bba74699224c71581c" class="block md:hidden" />
     </div>
   </section>
 
+  {/* TRENDING / POPULAR */}
+  <TrendingSection client:visible manga={latestFeed} />
+
+  {/* AD: Medium Rectangle */}
+  <section class="bg-background border-t border-border/50">
+    <div class="max-w-[1280px] mx-auto px-6 py-4 flex justify-center">
+      <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
+    </div>
+  </section>
+
+  {/* PALING POPULER */}
+  <PopularGrid client:visible manga={latestFeed} />
+
+  {/* UPDATE TERBARU (Mirror + Project) */}
+  <UpdateSection client:visible mirror={latestFeed} project={projectFeed} />
+
   {/* REKOMENDASI */}
   <Rekomendasi client:visible manga={latestFeed} />
 
-  {/* AD: Medium Rectangle 300x250 */}
-  <section class="py-6 bg-background">
-    <div class="max-w-[1280px] mx-auto px-6 flex justify-center">
-      <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
-    </div>
-  </section>
-
-  {/* UPDATE */}
-  <UpdateSection client:visible project={projectFeed} mirror={latestFeed} />
-
-  {/* AD: Medium Rectangle 300x250 */}
-  <section class="py-6 bg-background">
-    <div class="max-w-[1280px] mx-auto px-6 flex justify-center">
-      <AdSlot width={300} height={250} adKey="e9535ef5bb08e3bcfa1e00b46abac2e6" />
-    </div>
-  </section>
+  {/* DOWNLOAD APP */}
+  <DownloadApp client:load />
 
 </EditorialLayout>
